@@ -8,9 +8,15 @@ import gl "vendor:OpenGL"
 import "vendor:glfw"
 
 vertices := [?]f32{
-	-0.5, -0.5, 0.0,
+	 0.5,  0.5, 0.0,
 	 0.5, -0.5, 0.0,
-	 0.0,  0.5, 0.0,
+	-0.5, -0.5, 0.0,
+	-0.5,  0.5, 0.0,
+}
+
+indices := [?]u32{
+	0, 1, 3,
+	1, 2, 3,
 }
 
 vertex_shader_source := "#version 460 core\n" +
@@ -55,6 +61,10 @@ main :: proc() {
 	gl.GenBuffers(1, &vbo)
 	defer gl.DeleteBuffers(1, &vbo)
 
+	ebo: u32
+	gl.GenBuffers(1, &ebo)
+	defer gl.DeleteBuffers(1, &ebo)
+
 	vao: u32
 	gl.GenVertexArrays(1, &vao)
 	defer gl.DeleteVertexArrays(1, &vao)
@@ -62,6 +72,12 @@ main :: proc() {
 	gl.BindVertexArray(vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
+
+	// tell OpenGL how to read the vertex data
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	gl.EnableVertexAttribArray(0)
 
 	vertex_shader, fragment_shader: u32
 	ok: bool
@@ -100,9 +116,8 @@ main :: proc() {
 	gl.DeleteShader(vertex_shader)
 	gl.DeleteShader(fragment_shader)
 
-	// tell OpenGL how to read the vertex data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
-	gl.EnableVertexAttribArray(0)
+	// wireframe mode
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -116,7 +131,8 @@ main :: proc() {
 		// draw in the buffer
 		gl.UseProgram(shader_program)
 		gl.BindVertexArray(vao)
-		gl.DrawArrays(gl.TRIANGLES, 0, 3)
+		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+		gl.BindVertexArray(0)
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
