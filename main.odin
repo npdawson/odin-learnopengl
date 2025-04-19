@@ -27,10 +27,16 @@ vertex_shader_source := "#version 460 core\n" +
 						"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
 						"}"
 
-fragment_shader_source := "#version 460 core\n" +
+orange_fragment_shader_source := "#version 460 core\n" +
 						  "out vec4 FragColor;\n" +
 						  "void main() {\n" +
 						  "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n" +
+						  "}"
+
+yellow_fragment_shader_source := "#version 460 core\n" +
+						  "out vec4 FragColor;\n" +
+						  "void main() {\n" +
+						  "    FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n" +
 						  "}"
 
 main :: proc() {
@@ -92,7 +98,7 @@ main :: proc() {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 
-	vertex_shader, fragment_shader: u32
+	vertex_shader, orange_fragment_shader, yellow_fragment_shader: u32
 	ok: bool
 	vertex_shader, ok = gl.compile_shader_from_source(vertex_shader_source, .VERTEX_SHADER)
 	if !ok {
@@ -102,32 +108,54 @@ main :: proc() {
 		fmt.eprintln(info_log)
 		panic("vertex shader error")
 	}
-	fragment_shader, ok = gl.compile_shader_from_source(fragment_shader_source, .FRAGMENT_SHADER)
+	orange_fragment_shader, ok = gl.compile_shader_from_source(orange_fragment_shader_source, .FRAGMENT_SHADER)
 	if !ok {
 		fmt.eprintln("error compiling fragment shader:")
 		info_log: [512]u8
-		gl.GetShaderInfoLog(fragment_shader, 512, nil, &info_log[0])
+		gl.GetShaderInfoLog(orange_fragment_shader, 512, nil, &info_log[0])
+		fmt.eprintln(info_log)
+		panic("fragment shader error")
+	}
+	yellow_fragment_shader, ok = gl.compile_shader_from_source(yellow_fragment_shader_source, .FRAGMENT_SHADER)
+	if !ok {
+		fmt.eprintln("error compiling fragment shader:")
+		info_log: [512]u8
+		gl.GetShaderInfoLog(yellow_fragment_shader, 512, nil, &info_log[0])
 		fmt.eprintln(info_log)
 		panic("fragment shader error")
 	}
 
-	shader_program := gl.CreateProgram()
-	gl.AttachShader(shader_program, vertex_shader)
-	gl.AttachShader(shader_program, fragment_shader)
-	gl.LinkProgram(shader_program)
+	orange_shader_program := gl.CreateProgram()
+	gl.AttachShader(orange_shader_program, vertex_shader)
+	gl.AttachShader(orange_shader_program, orange_fragment_shader)
+	gl.LinkProgram(orange_shader_program)
 	success: i32
-	gl.GetProgramiv(shader_program, gl.LINK_STATUS, &success)
+	gl.GetProgramiv(orange_shader_program, gl.LINK_STATUS, &success)
 	if success == 0 {
 		fmt.eprintln("error linking shader program:")
 		info_log: [512]u8
-		gl.GetProgramInfoLog(shader_program, 512, nil, &info_log[0])
+		gl.GetProgramInfoLog(orange_shader_program, 512, nil, &info_log[0])
+		fmt.eprintln(info_log)
+		panic("shader program error")
+	}
+
+	yellow_shader_program := gl.CreateProgram()
+	gl.AttachShader(yellow_shader_program, vertex_shader)
+	gl.AttachShader(yellow_shader_program, yellow_fragment_shader)
+	gl.LinkProgram(yellow_shader_program)
+	gl.GetProgramiv(yellow_shader_program, gl.LINK_STATUS, &success)
+	if success == 0 {
+		fmt.eprintln("error linking shader program:")
+		info_log: [512]u8
+		gl.GetProgramInfoLog(yellow_shader_program, 512, nil, &info_log[0])
 		fmt.eprintln(info_log)
 		panic("shader program error")
 	}
 
 	// once linked into a program, we can delete the shaders
 	gl.DeleteShader(vertex_shader)
-	gl.DeleteShader(fragment_shader)
+	gl.DeleteShader(orange_fragment_shader)
+	gl.DeleteShader(yellow_fragment_shader)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
@@ -142,9 +170,10 @@ main :: proc() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		// draw in the buffer
-		gl.UseProgram(shader_program)
+		gl.UseProgram(orange_shader_program)
 		gl.BindVertexArray(vaos[0])
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
+		gl.UseProgram(yellow_shader_program)
 		gl.BindVertexArray(vaos[1])
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
