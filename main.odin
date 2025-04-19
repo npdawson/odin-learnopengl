@@ -8,12 +8,12 @@ import gl "vendor:OpenGL"
 import "vendor:glfw"
 
 vertices := [?]f32{
+	-0.5, -0.5, 0.0,
+	-0.1, -0.5, 0.0,
+	-0.1,  0.5, 0.0,
 	 0.1,  0.5, 0.0,
 	 0.1, -0.5, 0.0,
 	 0.5, -0.5, 0.0,
-	-0.1, -0.5, 0.0,
-	-0.1,  0.5, 0.0,
-	-0.5, -0.5, 0.0,
 }
 
 // indices := [?]u32{
@@ -59,21 +59,32 @@ main :: proc() {
 	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
 	glfw.SetErrorCallback(error_callback)
 
-	vbo: u32
-	gl.GenBuffers(1, &vbo)
-	defer gl.DeleteBuffers(1, &vbo)
+	vbos: [2]u32
+	gl.GenBuffers(2, &vbos[0])
+	defer gl.DeleteBuffers(2, &vbos[0])
 
 	// ebo: u32
 	// gl.GenBuffers(1, &ebo)
 	// defer gl.DeleteBuffers(1, &ebo)
 
-	vao: u32
-	gl.GenVertexArrays(1, &vao)
-	defer gl.DeleteVertexArrays(1, &vao)
+	vaos: [2]u32
+	gl.GenVertexArrays(2, &vaos[0])
+	defer gl.DeleteVertexArrays(2, &vaos[0])
 
-	gl.BindVertexArray(vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW)
+	gl.BindVertexArray(vaos[0])
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbos[0])
+	fmt.println(size_of(vertices))
+	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices)/2, &vertices[0], gl.STATIC_DRAW)
+	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	// gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
+
+	// tell OpenGL how to read the vertex data
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	gl.EnableVertexAttribArray(0)
+
+	gl.BindVertexArray(vaos[1])
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbos[1])
+	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices)/2, &vertices[len(vertices)/2], gl.STATIC_DRAW)
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	// gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
 
@@ -132,11 +143,13 @@ main :: proc() {
 
 		// draw in the buffer
 		gl.UseProgram(shader_program)
-		gl.BindVertexArray(vao)
+		gl.BindVertexArray(vaos[0])
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
-		gl.DrawArrays(gl.TRIANGLES, 3, 3)
+		gl.BindVertexArray(vaos[1])
+		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
-		// gl.BindVertexArray(0)
+		gl.BindVertexArray(0)
+		gl.UseProgram(0)
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
