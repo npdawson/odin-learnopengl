@@ -18,20 +18,6 @@ vertices := [?]f32{
 // 	1, 2, 3,
 // }
 
-vertex_shader_source := "#version 460 core\n" +
-						"layout (location = 0) in vec3 aPos;\n" +
-						"out vec4 vertexColor;\n" +
-						"void main() {\n" +
-						"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
-						"   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n" +
-						"}"
-
-fragment_shader_source := "#version 460 core\n" +
-						  "out vec4 FragColor;\n" +
-						  "in vec4 vertexColor;\n" +
-						  "void main() {\n" +
-						  "    FragColor = vertexColor;\n" +
-						  "}"
 main :: proc() {
 	if !glfw.Init() {
 		fmt.eprintln("failed to initialize GLFW")
@@ -80,42 +66,10 @@ main :: proc() {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 
-	vertex_shader, fragment_shader: u32
-	ok: bool
-	vertex_shader, ok = gl.compile_shader_from_source(vertex_shader_source, .VERTEX_SHADER)
-	if !ok {
-		fmt.eprintln("error compiling vertex shader:")
-		info_log: [512]u8
-		gl.GetShaderInfoLog(vertex_shader, 512, nil, &info_log[0])
-		fmt.eprintln(info_log)
-		panic("vertex shader error")
+	shader_program, shader_ok := gl.load_shaders("shaders/triangle.vert", "shaders/triangle.frag")
+	if !shader_ok {
+		panic("failed loading shaders")
 	}
-	fragment_shader, ok = gl.compile_shader_from_source(fragment_shader_source, .FRAGMENT_SHADER)
-	if !ok {
-		fmt.eprintln("error compiling fragment shader:")
-		info_log: [512]u8
-		gl.GetShaderInfoLog(fragment_shader, 512, nil, &info_log[0])
-		fmt.eprintln(info_log)
-		panic("fragment shader error")
-	}
-
-	shader_program := gl.CreateProgram()
-	gl.AttachShader(shader_program, vertex_shader)
-	gl.AttachShader(shader_program, fragment_shader)
-	gl.LinkProgram(shader_program)
-	success: i32
-	gl.GetProgramiv(shader_program, gl.LINK_STATUS, &success)
-	if success == 0 {
-		fmt.eprintln("error linking shader program:")
-		info_log: [512]u8
-		gl.GetProgramInfoLog(shader_program, 512, nil, &info_log[0])
-		fmt.eprintln(info_log)
-		panic("shader program error")
-	}
-
-	// once linked into a program, we can delete the shaders
-	gl.DeleteShader(vertex_shader)
-	gl.DeleteShader(fragment_shader)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
