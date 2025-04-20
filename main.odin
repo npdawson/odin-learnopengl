@@ -3,6 +3,7 @@ package learnopengl
 import "base:runtime"
 
 import "core:fmt"
+import glm "core:math/linalg/glsl"
 
 import "vendor:glfw"
 import gl "vendor:OpenGL"
@@ -20,8 +21,6 @@ indices := [?]u32 {
 	0, 1, 3, // first triangle
 	1, 2, 3, // secode triangle
 }
-
-mix: f32
 
 main :: proc() {
 	if !glfw.Init() {
@@ -138,6 +137,7 @@ main :: proc() {
 	gl.UseProgram(shader_program)
 	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture1"), 0)
 	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
+	transLoc := gl.GetUniformLocation(shader_program, "transform")
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -154,11 +154,21 @@ main :: proc() {
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, texture2)
 
-		gl.Uniform1f(gl.GetUniformLocation(shader_program, "mixture"), mix)
+		// update the tranformation matrix
+		t := f32(glfw.GetTime())
+		trans := glm.mat4Translate({0.5, -0.5, 0.0})
+		trans *= glm.mat4Rotate({0, 0, 1}, t)
+		gl.UniformMatrix4fv(transLoc, 1, gl.FALSE, raw_data(&trans))
 
 		// render contatiner
 		gl.UseProgram(shader_program)
 		gl.BindVertexArray(vao)
+		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+
+		sint := glm.sin(t)
+		trans2 := glm.mat4Translate({-0.5, 0.5, 0.0})
+		trans2 *= glm.mat4Scale({sint, sint, sint})
+		gl.UniformMatrix4fv(transLoc, 1, gl.FALSE, raw_data(&trans2))
 		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 
 		// check and call events and swap buffers
@@ -179,11 +189,5 @@ error_callback :: proc "c" (error: i32, desc: cstring) {
 process_input :: proc(window: glfw.WindowHandle) {
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
-	}
-	if glfw.GetKey(window, glfw.KEY_UP) == glfw.PRESS {
-		mix = min(mix+0.003, 1.0)
-	}
-	if glfw.GetKey(window, glfw.KEY_DOWN) == glfw.PRESS {
-		mix = max(mix-0.003, 0.0)
 	}
 }
