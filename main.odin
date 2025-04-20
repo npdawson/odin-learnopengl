@@ -88,10 +88,9 @@ main :: proc() {
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 
 	// create a texture in GL
-	texture: u32
-	gl.GenTextures(1, &texture)
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
+	texture1: u32
+	gl.GenTextures(1, &texture1)
+	gl.BindTexture(gl.TEXTURE_2D, texture1)
 	// set texture wrap/filter options on currently bound texture object
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -100,6 +99,7 @@ main :: proc() {
 
 	// load image from file, get w, h, and number of color channels
 	width, height, n_channels: i32
+	stb.set_flip_vertically_on_load(1)
 	data := stb.load("textures/container.jpg", &width, &height, &n_channels, 0)
 	if data != nil {
 		// load image data into texture
@@ -110,6 +110,32 @@ main :: proc() {
 	}
 	// don't need the image data anymore
 	stb.image_free(data)
+
+	// load a 2nd texture
+	texture2: u32
+	gl.GenTextures(1, &texture2)
+	gl.BindTexture(gl.TEXTURE_2D, texture2)
+	// set texture wrap/filter options on currently bound texture object
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+	// load image from file, get w, h, and number of color channels
+	data = stb.load("textures/awesomeface.png", &width, &height, &n_channels, 0)
+	if data != nil {
+		// load image data into texture
+		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+	} else {
+		fmt.eprintln("failed to load texture")
+	}
+	// don't need the image data anymore
+	stb.image_free(data)
+
+	gl.UseProgram(shader_program)
+	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture1"), 0)
+	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -122,13 +148,14 @@ main :: proc() {
 
 		// bind texture
 		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, texture)
+		gl.BindTexture(gl.TEXTURE_2D, texture1)
+		gl.ActiveTexture(gl.TEXTURE1)
+		gl.BindTexture(gl.TEXTURE_2D, texture2)
 
 		// render contatiner
 		gl.UseProgram(shader_program)
 		gl.BindVertexArray(vao)
 		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
-		gl.BindVertexArray(0)
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
