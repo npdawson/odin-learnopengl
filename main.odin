@@ -61,6 +61,10 @@ main :: proc() {
 	// functions and after the window is made the current context
 	gl.load_up_to(4, 6, glfw.gl_set_proc_address)
 
+	nrAttribs: i32
+	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttribs)
+	fmt.println("maximum number of vertex attributes supported:", nrAttribs)
+
 	gl.Viewport(0, 0, 800, 600)
 	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
 	glfw.SetErrorCallback(error_callback)
@@ -79,7 +83,6 @@ main :: proc() {
 
 	gl.BindVertexArray(vaos[0])
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbos[0])
-	fmt.println(size_of(vertices))
 	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices)/2, &vertices[0], gl.STATIC_DRAW)
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	// gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
