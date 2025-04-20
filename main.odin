@@ -3,6 +3,7 @@ package learnopengl
 import "base:runtime"
 
 import "core:fmt"
+import "core:math"
 
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -70,6 +71,7 @@ main :: proc() {
 	if !shader_ok {
 		panic("failed loading shaders")
 	}
+	defer gl.DeleteProgram(shader_program)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
@@ -83,13 +85,18 @@ main :: proc() {
 		gl.ClearColor(.2, .3, .3, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
-		// draw in the buffer
+		// activate the shader
 		gl.UseProgram(shader_program)
+
+		// calculate shader color
+		timeValue := glfw.GetTime()
+		greenValue := math.sin(timeValue) / 2 + 0.5
+		vertexColorLoc := gl.GetUniformLocation(shader_program, "ourColor")
+		gl.Uniform4f(vertexColorLoc, 0, f32(greenValue), 0, 1)
+
+		// draw in the buffer
 		gl.BindVertexArray(vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
-		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
-		gl.BindVertexArray(0)
-		gl.UseProgram(0)
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
