@@ -69,6 +69,8 @@ main :: proc() {
 
 	shader_program, shader_ok := gl.load_shaders("shaders/triangle.vert", "shaders/triangle.frag")
 	if !shader_ok {
+		msg, shader := gl.get_last_error_message()
+		fmt.eprintln(shader, "compile error:", msg)
 		panic("failed loading shaders")
 	}
 	defer gl.DeleteProgram(shader_program)
