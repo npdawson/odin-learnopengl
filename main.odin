@@ -10,16 +10,18 @@ import stb "vendor:stb/image"
 
 vertices := [?]f32 {
 	// positions         colors       texture coords
-	 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  2.0, 2.0,	// top right
-	 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  2.0, 0.0,	// bottom right
+	 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  1.0, 1.0,	// top right
+	 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  1.0, 0.0,	// bottom right
 	-0.5, -0.5, 0.0,  0.0, 0.0, 1.0,  0.0, 0.0,	// bottom left
-	-0.5,  0.5, 0.0,  1.0, 1.0, 1.0,  0.0, 2.0,	// top left
+	-0.5,  0.5, 0.0,  1.0, 1.0, 1.0,  0.0, 1.0,	// top left
 }
 
 indices := [?]u32 {
 	0, 1, 3, // first triangle
 	1, 2, 3, // secode triangle
 }
+
+mix: f32
 
 main :: proc() {
 	if !glfw.Init() {
@@ -92,8 +94,8 @@ main :: proc() {
 	gl.GenTextures(1, &texture1)
 	gl.BindTexture(gl.TEXTURE_2D, texture1)
 	// set texture wrap/filter options on currently bound texture object
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
@@ -152,6 +154,8 @@ main :: proc() {
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, texture2)
 
+		gl.Uniform1f(gl.GetUniformLocation(shader_program, "mixture"), mix)
+
 		// render contatiner
 		gl.UseProgram(shader_program)
 		gl.BindVertexArray(vao)
@@ -175,5 +179,11 @@ error_callback :: proc "c" (error: i32, desc: cstring) {
 process_input :: proc(window: glfw.WindowHandle) {
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
+	}
+	if glfw.GetKey(window, glfw.KEY_UP) == glfw.PRESS {
+		mix = min(mix+0.003, 1.0)
+	}
+	if glfw.GetKey(window, glfw.KEY_DOWN) == glfw.PRESS {
+		mix = max(mix-0.003, 0.0)
 	}
 }
