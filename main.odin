@@ -10,10 +10,10 @@ import stb "vendor:stb/image"
 
 vertices := [?]f32 {
 	// positions         colors       texture coords
-	 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  1.0, 1.0,	// top right
-	 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  1.0, 0.0,	// bottom right
+	 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  2.0, 2.0,	// top right
+	 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  2.0, 0.0,	// bottom right
 	-0.5, -0.5, 0.0,  0.0, 0.0, 1.0,  0.0, 0.0,	// bottom left
-	-0.5,  0.5, 0.0,  1.0, 1.0, 1.0,  0.0, 1.0,	// top left
+	-0.5,  0.5, 0.0,  1.0, 1.0, 1.0,  0.0, 2.0,	// top left
 }
 
 indices := [?]u32 {
@@ -92,8 +92,8 @@ main :: proc() {
 	gl.GenTextures(1, &texture1)
 	gl.BindTexture(gl.TEXTURE_2D, texture1)
 	// set texture wrap/filter options on currently bound texture object
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
