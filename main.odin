@@ -9,15 +9,11 @@ import gl "vendor:OpenGL"
 import "vendor:glfw"
 
 vertices := [?]f32{
-	-0.5, -0.5, 0.0,
-	 0.0,  0.5, 0.0,
-	 0.5, -0.5, 0.0,
+	// positions         colors
+	 0.5, -0.5, 0.0,  1.0, 0.0, 0.0,	// bottom right
+	-0.5, -0.5, 0.0,  0.0, 1.0, 0.0,	// bottom left
+	 0.0,  0.5, 0.0,  0.0, 0.0, 1.0,	// top
 }
-
-// indices := [?]u32{
-// 	0, 1, 3,
-// 	1, 2, 3,
-// }
 
 main :: proc() {
 	if !glfw.Init() {
@@ -64,8 +60,12 @@ main :: proc() {
 	// gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
 
 	// tell OpenGL how to read the vertex data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	// position data
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
+	// color data
+	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 3 * size_of(f32))
+	gl.EnableVertexAttribArray(1)
 
 	shader_program, shader_ok := gl.load_shaders("shaders/triangle.vert", "shaders/triangle.frag")
 	if !shader_ok {
