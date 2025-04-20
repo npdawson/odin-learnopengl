@@ -9,10 +9,7 @@ import "vendor:glfw"
 
 vertices := [?]f32{
 	-0.5, -0.5, 0.0,
-	-0.1, -0.5, 0.0,
-	-0.1,  0.5, 0.0,
-	 0.1,  0.5, 0.0,
-	 0.1, -0.5, 0.0,
+	 0.0,  0.5, 0.0,
 	 0.5, -0.5, 0.0,
 }
 
@@ -23,22 +20,18 @@ vertices := [?]f32{
 
 vertex_shader_source := "#version 460 core\n" +
 						"layout (location = 0) in vec3 aPos;\n" +
+						"out vec4 vertexColor;\n" +
 						"void main() {\n" +
 						"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
+						"   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n" +
 						"}"
 
-orange_fragment_shader_source := "#version 460 core\n" +
+fragment_shader_source := "#version 460 core\n" +
 						  "out vec4 FragColor;\n" +
+						  "in vec4 vertexColor;\n" +
 						  "void main() {\n" +
-						  "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n" +
+						  "    FragColor = vertexColor;\n" +
 						  "}"
-
-yellow_fragment_shader_source := "#version 460 core\n" +
-						  "out vec4 FragColor;\n" +
-						  "void main() {\n" +
-						  "    FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n" +
-						  "}"
-
 main :: proc() {
 	if !glfw.Init() {
 		fmt.eprintln("failed to initialize GLFW")
@@ -61,29 +54,25 @@ main :: proc() {
 	// functions and after the window is made the current context
 	gl.load_up_to(4, 6, glfw.gl_set_proc_address)
 
-	nrAttribs: i32
-	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttribs)
-	fmt.println("maximum number of vertex attributes supported:", nrAttribs)
-
 	gl.Viewport(0, 0, 800, 600)
 	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
 	glfw.SetErrorCallback(error_callback)
 
-	vbos: [2]u32
-	gl.GenBuffers(2, &vbos[0])
-	defer gl.DeleteBuffers(2, &vbos[0])
+	vbo: u32
+	gl.GenBuffers(1, &vbo)
+	defer gl.DeleteBuffers(1, &vbo)
 
 	// ebo: u32
 	// gl.GenBuffers(1, &ebo)
 	// defer gl.DeleteBuffers(1, &ebo)
 
-	vaos: [2]u32
-	gl.GenVertexArrays(2, &vaos[0])
-	defer gl.DeleteVertexArrays(2, &vaos[0])
+	vao: u32
+	gl.GenVertexArrays(1, &vao)
+	defer gl.DeleteVertexArrays(1, &vao)
 
-	gl.BindVertexArray(vaos[0])
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbos[0])
-	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices)/2, &vertices[0], gl.STATIC_DRAW)
+	gl.BindVertexArray(vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW)
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	// gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
 
@@ -91,17 +80,7 @@ main :: proc() {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 
-	gl.BindVertexArray(vaos[1])
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbos[1])
-	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices)/2, &vertices[len(vertices)/2], gl.STATIC_DRAW)
-	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-	// gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
-
-	// tell OpenGL how to read the vertex data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
-	gl.EnableVertexAttribArray(0)
-
-	vertex_shader, orange_fragment_shader, yellow_fragment_shader: u32
+	vertex_shader, fragment_shader: u32
 	ok: bool
 	vertex_shader, ok = gl.compile_shader_from_source(vertex_shader_source, .VERTEX_SHADER)
 	if !ok {
@@ -111,54 +90,32 @@ main :: proc() {
 		fmt.eprintln(info_log)
 		panic("vertex shader error")
 	}
-	orange_fragment_shader, ok = gl.compile_shader_from_source(orange_fragment_shader_source, .FRAGMENT_SHADER)
+	fragment_shader, ok = gl.compile_shader_from_source(fragment_shader_source, .FRAGMENT_SHADER)
 	if !ok {
 		fmt.eprintln("error compiling fragment shader:")
 		info_log: [512]u8
-		gl.GetShaderInfoLog(orange_fragment_shader, 512, nil, &info_log[0])
-		fmt.eprintln(info_log)
-		panic("fragment shader error")
-	}
-	yellow_fragment_shader, ok = gl.compile_shader_from_source(yellow_fragment_shader_source, .FRAGMENT_SHADER)
-	if !ok {
-		fmt.eprintln("error compiling fragment shader:")
-		info_log: [512]u8
-		gl.GetShaderInfoLog(yellow_fragment_shader, 512, nil, &info_log[0])
+		gl.GetShaderInfoLog(fragment_shader, 512, nil, &info_log[0])
 		fmt.eprintln(info_log)
 		panic("fragment shader error")
 	}
 
-	orange_shader_program := gl.CreateProgram()
-	gl.AttachShader(orange_shader_program, vertex_shader)
-	gl.AttachShader(orange_shader_program, orange_fragment_shader)
-	gl.LinkProgram(orange_shader_program)
+	shader_program := gl.CreateProgram()
+	gl.AttachShader(shader_program, vertex_shader)
+	gl.AttachShader(shader_program, fragment_shader)
+	gl.LinkProgram(shader_program)
 	success: i32
-	gl.GetProgramiv(orange_shader_program, gl.LINK_STATUS, &success)
+	gl.GetProgramiv(shader_program, gl.LINK_STATUS, &success)
 	if success == 0 {
 		fmt.eprintln("error linking shader program:")
 		info_log: [512]u8
-		gl.GetProgramInfoLog(orange_shader_program, 512, nil, &info_log[0])
-		fmt.eprintln(info_log)
-		panic("shader program error")
-	}
-
-	yellow_shader_program := gl.CreateProgram()
-	gl.AttachShader(yellow_shader_program, vertex_shader)
-	gl.AttachShader(yellow_shader_program, yellow_fragment_shader)
-	gl.LinkProgram(yellow_shader_program)
-	gl.GetProgramiv(yellow_shader_program, gl.LINK_STATUS, &success)
-	if success == 0 {
-		fmt.eprintln("error linking shader program:")
-		info_log: [512]u8
-		gl.GetProgramInfoLog(yellow_shader_program, 512, nil, &info_log[0])
+		gl.GetProgramInfoLog(shader_program, 512, nil, &info_log[0])
 		fmt.eprintln(info_log)
 		panic("shader program error")
 	}
 
 	// once linked into a program, we can delete the shaders
 	gl.DeleteShader(vertex_shader)
-	gl.DeleteShader(orange_fragment_shader)
-	gl.DeleteShader(yellow_fragment_shader)
+	gl.DeleteShader(fragment_shader)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
@@ -173,11 +130,8 @@ main :: proc() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		// draw in the buffer
-		gl.UseProgram(orange_shader_program)
-		gl.BindVertexArray(vaos[0])
-		gl.DrawArrays(gl.TRIANGLES, 0, 3)
-		gl.UseProgram(yellow_shader_program)
-		gl.BindVertexArray(vaos[1])
+		gl.UseProgram(shader_program)
+		gl.BindVertexArray(vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 		gl.BindVertexArray(0)
