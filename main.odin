@@ -96,6 +96,10 @@ main :: proc() {
 		vertexColorLoc := gl.GetUniformLocation(shader_program, "ourColor")
 		gl.Uniform4f(vertexColorLoc, 0, f32(greenValue), 0, 1)
 
+		// offset to the right
+		vertexOffsetLoc := gl.GetUniformLocation(shader_program, "xOffset")
+		gl.Uniform1f(vertexOffsetLoc, -0.2)
+
 		// draw in the buffer
 		gl.BindVertexArray(vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
