@@ -81,6 +81,7 @@ main :: proc() {
 	gl.load_up_to(4, 6, glfw.gl_set_proc_address)
 
 	gl.Viewport(0, 0, 800, 600)
+	gl.Enable(gl.DEPTH_TEST)
 	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
 	glfw.SetErrorCallback(error_callback)
 
@@ -195,7 +196,7 @@ main :: proc() {
 
 		// clear the buffer
 		gl.ClearColor(.2, .3, .3, 1)
-		gl.Clear(gl.COLOR_BUFFER_BIT)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		// bind texture
 		gl.ActiveTexture(gl.TEXTURE0)
