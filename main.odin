@@ -139,6 +139,19 @@ main :: proc() {
 	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
 	transLoc := gl.GetUniformLocation(shader_program, "transform")
 
+	// model: local -> world coords
+	model := glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(-55))
+	// view: world -> view coords
+	view := glm.mat4Translate({0, 0, -3})
+	// projection: view -> clip coords
+	projection := glm.mat4Perspective(glm.radians_f32(45), 800/600, 0.1, 100)
+	modelLoc := gl.GetUniformLocation(shader_program, "model")
+	gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+	viewLoc := gl.GetUniformLocation(shader_program, "view")
+	gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
+	projectionLoc := gl.GetUniformLocation(shader_program, "projection")
+	gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
+
 	// render loop
 	for !glfw.WindowShouldClose(window) {
 		// input
