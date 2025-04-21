@@ -10,11 +10,47 @@ import gl "vendor:OpenGL"
 import stb "vendor:stb/image"
 
 vertices := [?]f32 {
-	// positions         colors       texture coords
-	 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  1.0, 1.0,	// top right
-	 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  1.0, 0.0,	// bottom right
-	-0.5, -0.5, 0.0,  0.0, 0.0, 1.0,  0.0, 0.0,	// bottom left
-	-0.5,  0.5, 0.0,  1.0, 1.0, 1.0,  0.0, 1.0,	// top left
+	-0.5, -0.5, -0.5,  0.0, 0.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 0.0,
+
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
+    -0.5,  0.5,  0.5,  0.0, 1.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+
+    -0.5,  0.5,  0.5,  1.0, 0.0,
+    -0.5,  0.5, -0.5,  1.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+    -0.5,  0.5,  0.5,  1.0, 0.0,
+
+     0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5, -0.5, -0.5,  0.0, 1.0,
+     0.5, -0.5, -0.5,  0.0, 1.0,
+     0.5, -0.5,  0.5,  0.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
+
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+     0.5, -0.5, -0.5,  1.0, 1.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
+    -0.5,  0.5,  0.5,  0.0, 0.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0,
 }
 
 indices := [?]u32 {
@@ -68,14 +104,14 @@ main :: proc() {
 
 	// tell OpenGL how to read the vertex data
 	// position data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 	// color data
-	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
-	gl.EnableVertexAttribArray(1)
+	// gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
+	// gl.EnableVertexAttribArray(1)
 	// texture coords
-	gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 6 * size_of(f32))
-	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 3 * size_of(f32))
+	gl.EnableVertexAttribArray(1)
 
 	shader_program, shader_ok := gl.load_shaders("shaders/triangle.vert", "shaders/triangle.frag")
 	if !shader_ok {
@@ -137,7 +173,7 @@ main :: proc() {
 	gl.UseProgram(shader_program)
 	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture1"), 0)
 	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
-	transLoc := gl.GetUniformLocation(shader_program, "transform")
+	// transLoc := gl.GetUniformLocation(shader_program, "transform")
 
 	// model: local -> world coords
 	model := glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(-55))
@@ -167,22 +203,22 @@ main :: proc() {
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, texture2)
 
-		// update the tranformation matrix
 		t := f32(glfw.GetTime())
-		trans := glm.mat4Translate({0.5, -0.5, 0.0})
-		trans *= glm.mat4Rotate({0, 0, 1}, t)
-		gl.UniformMatrix4fv(transLoc, 1, gl.FALSE, raw_data(&trans))
+
+		model = glm.mat4Rotate({0.5, 1.0, 0.0}, glm.radians_f32(50) * t)
+		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
 
 		// render contatiner
 		gl.UseProgram(shader_program)
 		gl.BindVertexArray(vao)
-		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+		gl.DrawArrays(gl.TRIANGLES, 0, 36)
 
-		sint := glm.sin(t)
-		trans2 := glm.mat4Translate({-0.5, 0.5, 0.0})
-		trans2 *= glm.mat4Scale({sint, sint, sint})
-		gl.UniformMatrix4fv(transLoc, 1, gl.FALSE, raw_data(&trans2))
-		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+		// sint := glm.sin(t)
+		// trans2 := glm.mat4Translate({-0.5, 0.5, 0.0})
+		// trans2 *= glm.mat4Scale({sint, sint, sint})
+		// gl.UniformMatrix4fv(transLoc, 1, gl.FALSE, raw_data(&trans2))
+		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
