@@ -190,16 +190,16 @@ main :: proc() {
 	// transLoc := gl.GetUniformLocation(shader_program, "transform")
 
 	// model: local -> world coords
-	model := glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(-55))
+	// model := glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(-55))
 	// view: world -> view coords
-	view := glm.mat4Translate({0, 0, -3})
+	// view := glm.mat4Translate({0, 0, -3})
 	// view *= glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(25))
 	// projection: view -> clip coords
-	projection := glm.mat4Perspective(glm.radians_f32(60), 800/600, 0.1, 100)
+	projection := glm.mat4Perspective(glm.radians_f32(45), 800/600, 0.1, 100)
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
-	gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+	// gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
-	gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
+	// gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 	projectionLoc := gl.GetUniformLocation(shader_program, "projection")
 	gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 
@@ -218,15 +218,20 @@ main :: proc() {
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, texture2)
 
+		gl.UseProgram(shader_program)
+
 		t := f32(glfw.GetTime())
 
-		model = glm.mat4Rotate({0.5, 1.0, 0.0}, glm.radians_f32(50) * t)
-		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+		radius: f32 = 10
+		cam_x := glm.sin(t) * radius
+		cam_z := glm.cos(t) * radius
+		view := glm.mat4LookAt(glm.vec3{f32(cam_x), 0, f32(cam_z)},
+							   glm.vec3{0, 0, 0},
+							   glm.vec3{0, 1, 0})
+		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
-		// render contatiner
-		gl.UseProgram(shader_program)
+		// render boxes
 		gl.BindVertexArray(vao)
-		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 		for i in 0..<10 {
 			model := glm.mat4Translate(cube_positions[i])
 			angle := 20 * f32(i)
@@ -236,6 +241,7 @@ main :: proc() {
 				model *= glm.mat4Rotate(glm.vec3{1, 0.3, 0.5}, glm.radians_f32(angle))
 			}
 			gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+
 			gl.DrawArrays(gl.TRIANGLES, 0, 36)
 		}
 
