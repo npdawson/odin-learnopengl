@@ -58,6 +58,19 @@ indices := [?]u32 {
 	1, 2, 3, // secode triangle
 }
 
+cube_positions := [?]glm.vec3 {
+	glm.vec3{0, 0, 0},
+	glm.vec3{2, 5, -15},
+	glm.vec3{-1.5, -2.2, -2.5},
+	glm.vec3{-3.8, -2.0, -12.3},
+    glm.vec3{ 2.4, -0.4, -3.5},
+    glm.vec3{-1.7,  3.0, -7.5},
+    glm.vec3{ 1.3, -2.0, -2.5},
+    glm.vec3{ 1.5,  2.0, -2.5},
+    glm.vec3{ 1.5,  0.2, -1.5},
+    glm.vec3{-1.3,  1.0, -1.5},
+}
+
 main :: proc() {
 	if !glfw.Init() {
 		fmt.eprintln("failed to initialize GLFW")
@@ -180,8 +193,9 @@ main :: proc() {
 	model := glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(-55))
 	// view: world -> view coords
 	view := glm.mat4Translate({0, 0, -3})
+	// view *= glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(25))
 	// projection: view -> clip coords
-	projection := glm.mat4Perspective(glm.radians_f32(45), 800/600, 0.1, 100)
+	projection := glm.mat4Perspective(glm.radians_f32(60), 800/600, 0.1, 100)
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
 	gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
@@ -213,7 +227,17 @@ main :: proc() {
 		gl.UseProgram(shader_program)
 		gl.BindVertexArray(vao)
 		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
-		gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		for i in 0..<10 {
+			model := glm.mat4Translate(cube_positions[i])
+			angle := 20 * f32(i)
+			if i % 3 == 0 {
+				model *= glm.mat4Rotate(glm.vec3{0.5, 1.0, 0.0}, glm.radians_f32(50 + angle) * t)
+			} else {
+				model *= glm.mat4Rotate(glm.vec3{1, 0.3, 0.5}, glm.radians_f32(angle))
+			}
+			gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+			gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		}
 
 		// sint := glm.sin(t)
 		// trans2 := glm.mat4Translate({-0.5, 0.5, 0.0})
