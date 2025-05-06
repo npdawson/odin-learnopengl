@@ -9,6 +9,20 @@ import "vendor:glfw"
 import gl "vendor:OpenGL"
 import stb "vendor:stb/image"
 
+camera_pos := glm.vec3{0, 0, 3}
+camera_front := glm.vec3{0, 0, -1}
+camera_up := glm.vec3{0, 1, 0}
+
+delta_time: f64
+last_frame: f64
+
+yaw: f64 = -90
+pitch: f64
+last_x: f64 = 400
+last_y: f64 = 300
+
+first_mouse := true
+
 vertices := [?]f32 {
 	-0.5, -0.5, -0.5,  0.0, 0.0,
      0.5, -0.5, -0.5,  1.0, 0.0,
@@ -89,6 +103,8 @@ main :: proc() {
 	}
 	glfw.MakeContextCurrent(window)
 
+	glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+
 	// load OpenGL function pointers, must be done before calling any other gl
 	// functions and after the window is made the current context
 	gl.load_up_to(4, 6, glfw.gl_set_proc_address)
@@ -97,6 +113,7 @@ main :: proc() {
 	gl.Enable(gl.DEPTH_TEST)
 	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
 	glfw.SetErrorCallback(error_callback)
+	glfw.SetCursorPosCallback(window, mouse_callback)
 
 	vao: u32
 	gl.GenVertexArrays(1, &vao)
@@ -208,6 +225,11 @@ main :: proc() {
 		// input
 		process_input(window)
 
+		// delta time
+		current_frame := glfw.GetTime()
+		delta_time = current_frame - last_frame
+		last_frame = current_frame
+
 		// clear the buffer
 		gl.ClearColor(.2, .3, .3, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -222,12 +244,9 @@ main :: proc() {
 
 		t := f32(glfw.GetTime())
 
-		radius: f32 = 10
-		cam_x := glm.sin(t) * radius
-		cam_z := glm.cos(t) * radius
-		view := glm.mat4LookAt(glm.vec3{f32(cam_x), 0, f32(cam_z)},
-							   glm.vec3{0, 0, 0},
-							   glm.vec3{0, 1, 0})
+		view := glm.mat4LookAt(camera_pos,
+							   camera_pos + camera_front,
+							   camera_up)
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
 		// render boxes
@@ -267,7 +286,49 @@ error_callback :: proc "c" (error: i32, desc: cstring) {
 }
 
 process_input :: proc(window: glfw.WindowHandle) {
+	camera_speed: f32 = 2.5 * f32(delta_time)
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
 	}
+	if glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS {
+		camera_pos += camera_speed * camera_front
+	}
+	if glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS {
+		camera_pos -= camera_speed * camera_front
+	}
+	if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS {
+		camera_pos -= glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
+	}
+	if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS {
+		camera_pos += glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
+	}
+}
+
+mouse_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
+	if first_mouse {
+		last_x = x
+		last_y = y
+		first_mouse = false
+	}
+
+	x_offset := x - last_x
+	y_offset := last_y - y
+	last_x = x
+	last_y = y
+
+	sensitivity := 0.1
+	x_offset *= sensitivity
+	y_offset *= sensitivity
+
+	yaw += x_offset
+	pitch += y_offset
+
+	if pitch > 89 { pitch = 89 }
+	else if pitch < -89 { pitch = -89 }
+
+	direction: glm.vec3
+	direction.x = cast(f32)(glm.cos(glm.radians(yaw)) * glm.cos(glm.radians(pitch)))
+	direction.y = cast(f32)glm.sin(glm.radians(pitch))
+	direction.z = cast(f32)(glm.sin(glm.radians(yaw)) * glm.cos(glm.radians(pitch)))
+	camera_front = glm.normalize(direction)
 }
