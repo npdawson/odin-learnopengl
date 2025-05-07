@@ -290,14 +290,16 @@ error_callback :: proc "c" (error: i32, desc: cstring) {
 
 process_input :: proc(window: glfw.WindowHandle) {
 	camera_speed: f32 = 2.5 * f32(delta_time)
+	player_right := glm.normalize(glm.cross(camera_up, camera_front))
+	player_front := glm.normalize(glm.cross(player_right, camera_up))
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
 	}
 	if glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS {
-		camera_pos += camera_speed * camera_front
+		camera_pos += camera_speed * player_front
 	}
 	if glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS {
-		camera_pos -= camera_speed * camera_front
+		camera_pos -= camera_speed * player_front
 	}
 	if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS {
 		camera_pos -= glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
