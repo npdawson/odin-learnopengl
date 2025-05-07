@@ -20,6 +20,7 @@ yaw: f64 = -90
 pitch: f64
 last_x: f64 = 400
 last_y: f64 = 300
+fov: f32 = 45
 
 first_mouse := true
 
@@ -114,6 +115,7 @@ main :: proc() {
 	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
 	glfw.SetErrorCallback(error_callback)
 	glfw.SetCursorPosCallback(window, mouse_callback)
+	glfw.SetScrollCallback(window, scroll_callback)
 
 	vao: u32
 	gl.GenVertexArrays(1, &vao)
@@ -212,13 +214,12 @@ main :: proc() {
 	// view := glm.mat4Translate({0, 0, -3})
 	// view *= glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(25))
 	// projection: view -> clip coords
-	projection := glm.mat4Perspective(glm.radians_f32(45), 800/600, 0.1, 100)
+	// projection := glm.mat4Perspective(glm.radians(fov), 800/600, 0.1, 100)
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
 	// gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
 	// gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 	projectionLoc := gl.GetUniformLocation(shader_program, "projection")
-	gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -244,6 +245,8 @@ main :: proc() {
 
 		t := f32(glfw.GetTime())
 
+		projection := glm.mat4Perspective(glm.radians(fov), 800/600, 0.1, 100)
+		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 		view := glm.mat4LookAt(camera_pos,
 							   camera_pos + camera_front,
 							   camera_up)
@@ -331,4 +334,10 @@ mouse_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 	direction.y = cast(f32)glm.sin(glm.radians(pitch))
 	direction.z = cast(f32)(glm.sin(glm.radians(yaw)) * glm.cos(glm.radians(pitch)))
 	camera_front = glm.normalize(direction)
+}
+
+scroll_callback :: proc "c" (window: glfw.WindowHandle, xoffset, yoffset: f64) {
+	fov -= cast(f32)yoffset
+	if fov < 1 { fov = 1 }
+	else if fov > 45 { fov = 45 }
 }
