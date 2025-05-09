@@ -9,18 +9,13 @@ import "vendor:glfw"
 import gl "vendor:OpenGL"
 import stb "vendor:stb/image"
 
-camera_pos := glm.vec3{0, 0, 3}
-camera_front := glm.vec3{0, 0, -1}
-camera_up := glm.vec3{0, 1, 0}
-
 delta_time: f64
 last_frame: f64
 
-yaw: f64 = -90
-pitch: f64
-last_x: f64 = 400
-last_y: f64 = 300
-fov: f32 = 45
+last_x: f32
+last_y: f32
+
+camera := camera_create(glm.vec3{0, 0, 3})
 
 first_mouse := true
 
@@ -245,11 +240,9 @@ main :: proc() {
 
 		t := f32(glfw.GetTime())
 
-		projection := glm.mat4Perspective(glm.radians(fov), 800/600, 0.1, 100)
+		projection := glm.mat4Perspective(glm.radians(camera.zoom), 800/600, 0.1, 100)
 		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
-		view := glm.mat4LookAt(camera_pos,
-							   camera_pos + camera_front,
-							   camera_up)
+		view := camera_view_matrix(&camera)
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
 		// render boxes
@@ -290,26 +283,27 @@ error_callback :: proc "c" (error: i32, desc: cstring) {
 
 process_input :: proc(window: glfw.WindowHandle) {
 	camera_speed: f32 = 2.5 * f32(delta_time)
-	player_right := glm.normalize(glm.cross(camera_up, camera_front))
-	player_front := glm.normalize(glm.cross(player_right, camera_up))
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
 	}
 	if glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS {
-		camera_pos += camera_speed * player_front
+		process_keyboard(&camera, .FORWARD, delta_time)
 	}
 	if glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS {
-		camera_pos -= camera_speed * player_front
+		process_keyboard(&camera, .BACKWARD, delta_time)
 	}
 	if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS {
-		camera_pos -= glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
+		process_keyboard(&camera, .LEFT, delta_time)
 	}
 	if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS {
-		camera_pos += glm.normalize(glm.cross(camera_front, camera_up)) * camera_speed
+		process_keyboard(&camera, .RIGHT, delta_time)
 	}
 }
 
-mouse_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
+mouse_callback :: proc "c" (window: glfw.WindowHandle, x_in, y_in: f64) {
+	x := cast(f32)x_in
+	y := cast(f32)y_in
+
 	if first_mouse {
 		last_x = x
 		last_y = y
@@ -321,25 +315,9 @@ mouse_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 	last_x = x
 	last_y = y
 
-	sensitivity := 0.1
-	x_offset *= sensitivity
-	y_offset *= sensitivity
-
-	yaw += x_offset
-	pitch += y_offset
-
-	if pitch > 89 { pitch = 89 }
-	else if pitch < -89 { pitch = -89 }
-
-	direction: glm.vec3
-	direction.x = cast(f32)(glm.cos(glm.radians(yaw)) * glm.cos(glm.radians(pitch)))
-	direction.y = cast(f32)glm.sin(glm.radians(pitch))
-	direction.z = cast(f32)(glm.sin(glm.radians(yaw)) * glm.cos(glm.radians(pitch)))
-	camera_front = glm.normalize(direction)
+	process_mouse(&camera, x_offset, y_offset)
 }
 
 scroll_callback :: proc "c" (window: glfw.WindowHandle, xoffset, yoffset: f64) {
-	fov -= cast(f32)yoffset
-	if fov < 1 { fov = 1 }
-	else if fov > 45 { fov = 45 }
+	process_scroll(&camera, cast(f32)yoffset)
 }
