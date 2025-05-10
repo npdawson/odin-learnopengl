@@ -156,10 +156,15 @@ main :: proc() {
 
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
 
-	lightDirLoc := gl.GetUniformLocation(shader_program, "light.direction")
+	// lightDirLoc := gl.GetUniformLocation(shader_program, "light.direction")
+	lightPosLoc := gl.GetUniformLocation(shader_program, "light.position")
 	lightAmbientLoc := gl.GetUniformLocation(shader_program, "light.ambient")
 	lightDiffuseLoc := gl.GetUniformLocation(shader_program, "light.diffuse")
 	lightSpecularLoc := gl.GetUniformLocation(shader_program, "light.specular")
+
+	lightConstantLoc := gl.GetUniformLocation(shader_program, "light.constant")
+	lightLinearLoc := gl.GetUniformLocation(shader_program, "light.linear")
+	lightQuadraticLoc := gl.GetUniformLocation(shader_program, "light.quadratic")
 
 	diffuseLoc := gl.GetUniformLocation(shader_program, "material.diffuse")
 	specularLoc := gl.GetUniformLocation(shader_program, "material.specular")
@@ -182,7 +187,11 @@ main :: proc() {
 	gl.Uniform1i(diffuseLoc, 0)
 	gl.Uniform1i(specularLoc, 1)
 
-	gl.Uniform3f(lightDirLoc, -0.2, -1.0, -0.3)
+	gl.Uniform1f(lightConstantLoc, 1.0)
+	gl.Uniform1f(lightLinearLoc, 0.09)
+	gl.Uniform1f(lightQuadraticLoc, 0.032)
+
+	// gl.Uniform3f(lightDirLoc, -0.2, -1.0, -0.3)
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -198,9 +207,9 @@ main :: proc() {
 		gl.ClearColor(.1, .1, .1, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		light_pos.x = cast(f32)glm.sin(current_frame) * 2
+		light_pos.x = cast(f32)glm.sin(current_frame) * 4
 		light_pos.y = 0
-		light_pos.z = cast(f32)glm.cos(current_frame) * 2
+		light_pos.z = cast(f32)glm.cos(current_frame) * 3
 
 		// light_color: glm.vec3
 		// light_color.x = cast(f32)glm.sin(current_frame * 2)
@@ -212,6 +221,7 @@ main :: proc() {
 
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
+		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
 		gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
 
 		gl.Uniform3f(lightAmbientLoc, 0.2, 0.2, 0.2)
