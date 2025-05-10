@@ -19,69 +19,54 @@ camera := camera_create(glm.vec3{0, 0, 3})
 
 first_mouse := true
 
+light_pos := glm.vec3{1.2, 1.0, 2.0}
+
 vertices := [?]f32 {
-	-0.5, -0.5, -0.5,  0.0, 0.0,
-     0.5, -0.5, -0.5,  1.0, 0.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 0.0,
+	-0.5, -0.5, -0.5,
+     0.5, -0.5, -0.5,
+     0.5,  0.5, -0.5,
+     0.5,  0.5, -0.5,
+    -0.5,  0.5, -0.5,
+    -0.5, -0.5, -0.5,
 
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-     0.5, -0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 1.0,
-     0.5,  0.5,  0.5,  1.0, 1.0,
-    -0.5,  0.5,  0.5,  0.0, 1.0,
-    -0.5, -0.5,  0.5,  0.0, 0.0,
+    -0.5, -0.5,  0.5,
+     0.5, -0.5,  0.5,
+     0.5,  0.5,  0.5,
+     0.5,  0.5,  0.5,
+    -0.5,  0.5,  0.5,
+    -0.5, -0.5,  0.5,
 
-    -0.5,  0.5,  0.5,  1.0, 0.0,
-    -0.5,  0.5, -0.5,  1.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-    -0.5,  0.5,  0.5,  1.0, 0.0,
+    -0.5,  0.5,  0.5,
+    -0.5,  0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    -0.5, -0.5,  0.5,
+    -0.5,  0.5,  0.5,
 
-     0.5,  0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5,  0.5,  0.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,
+     0.5,  0.5, -0.5,
+     0.5, -0.5, -0.5,
+     0.5, -0.5, -0.5,
+     0.5, -0.5,  0.5,
+     0.5,  0.5,  0.5,
 
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5, -0.5,  1.0, 1.0,
-     0.5, -0.5,  0.5,  1.0, 0.0,
-     0.5, -0.5,  0.5,  1.0, 0.0,
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-    -0.5, -0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5, -0.5,
+     0.5, -0.5, -0.5,
+     0.5, -0.5,  0.5,
+     0.5, -0.5,  0.5,
+    -0.5, -0.5,  0.5,
+    -0.5, -0.5, -0.5,
 
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-    -0.5,  0.5,  0.5,  0.0, 0.0,
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-}
-
-indices := [?]u32 {
-	0, 1, 3, // first triangle
-	1, 2, 3, // secode triangle
-}
-
-cube_positions := [?]glm.vec3 {
-	glm.vec3{0, 0, 0},
-	glm.vec3{2, 5, -15},
-	glm.vec3{-1.5, -2.2, -2.5},
-	glm.vec3{-3.8, -2.0, -12.3},
-    glm.vec3{ 2.4, -0.4, -3.5},
-    glm.vec3{-1.7,  3.0, -7.5},
-    glm.vec3{ 1.3, -2.0, -2.5},
-    glm.vec3{ 1.5,  2.0, -2.5},
-    glm.vec3{ 1.5,  0.2, -1.5},
-    glm.vec3{-1.3,  1.0, -1.5},
+    -0.5,  0.5, -0.5,
+     0.5,  0.5, -0.5,
+     0.5,  0.5,  0.5,
+     0.5,  0.5,  0.5,
+    -0.5,  0.5,  0.5,
+    -0.5,  0.5, -0.5,
 }
 
 main :: proc() {
+	glfw.InitHint(glfw.PLATFORM, glfw.PLATFORM_X11)
 	if !glfw.Init() {
 		fmt.eprintln("failed to initialize GLFW")
 		panic("glfw init error")
@@ -112,42 +97,53 @@ main :: proc() {
 	glfw.SetCursorPosCallback(window, mouse_callback)
 	glfw.SetScrollCallback(window, scroll_callback)
 
-	vao: u32
-	gl.GenVertexArrays(1, &vao)
-	defer gl.DeleteVertexArrays(1, &vao)
+	cube_vao: u32
+	gl.GenVertexArrays(1, &cube_vao)
+	defer gl.DeleteVertexArrays(1, &cube_vao)
+
+	light_vao: u32
+	gl.GenVertexArrays(1, &light_vao)
+	defer gl.DeleteVertexArrays(1, &light_vao)
 
 	vbo: u32
 	gl.GenBuffers(1, &vbo)
 	defer gl.DeleteBuffers(1, &vbo)
 
-	ebo: u32
-	gl.GenBuffers(1, &ebo)
-	defer gl.DeleteBuffers(1, &ebo)
-
-	gl.BindVertexArray(vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW)
 
+	gl.BindVertexArray(cube_vao)
 	// tell OpenGL how to read the vertex data
 	// position data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 	// color data
 	// gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
 	// gl.EnableVertexAttribArray(1)
 	// texture coords
-	gl.VertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 3 * size_of(f32))
-	gl.EnableVertexAttribArray(1)
+	// gl.VertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 3 * size_of(f32))
+	// gl.EnableVertexAttribArray(1)
 
-	shader_program, shader_ok := gl.load_shaders("shaders/triangle.vert", "shaders/triangle.frag")
+	gl.BindVertexArray(light_vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	gl.EnableVertexAttribArray(0)
+
+	shader_program, shader_ok := gl.load_shaders("shaders/container.vert.glsl", "shaders/container.frag.glsl")
 	if !shader_ok {
 		msg, shader := gl.get_last_error_message()
 		fmt.eprintln(shader, "compile error:", msg)
 		panic("failed loading shaders")
 	}
 	defer gl.DeleteProgram(shader_program)
+
+	light_shader_program, light_shader_ok := gl.load_shaders("shaders/light.vert.glsl", "shaders/light.frag.glsl")
+	if !light_shader_ok {
+		msg, shader := gl.get_last_error_message()
+		fmt.eprintln(shader, "compile error:", msg)
+		panic("failed loading light shaders")
+	}
+	defer gl.DeleteProgram(light_shader_program)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
@@ -199,8 +195,12 @@ main :: proc() {
 	stb.image_free(data)
 
 	gl.UseProgram(shader_program)
-	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture1"), 0)
-	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
+	objectColorLoc := gl.GetUniformLocation(shader_program, "objectColor")
+	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
+	gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
+	gl.Uniform3f(lightColorLoc, 1, 1, 1)
+	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture1"), 0)
+	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
 	// transLoc := gl.GetUniformLocation(shader_program, "transform")
 
 	// model: local -> world coords
@@ -215,50 +215,67 @@ main :: proc() {
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
 	// gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 	projectionLoc := gl.GetUniformLocation(shader_program, "projection")
+	lightModelLoc := gl.GetUniformLocation(light_shader_program, "model")
+	// gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+	lightViewLoc := gl.GetUniformLocation(light_shader_program, "view")
+	// gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
+	lightProjectionLoc := gl.GetUniformLocation(light_shader_program, "projection")
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
-		// input
-		process_input(window)
-
 		// delta time
 		current_frame := glfw.GetTime()
 		delta_time = current_frame - last_frame
 		last_frame = current_frame
 
+		// input
+		process_input(window)
+
 		// clear the buffer
-		gl.ClearColor(.2, .3, .3, 1)
+		gl.ClearColor(.1, .1, .1, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		// bind texture
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, texture1)
-		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D, texture2)
+		// gl.ActiveTexture(gl.TEXTURE0)
+		// gl.BindTexture(gl.TEXTURE_2D, texture1)
+		// gl.ActiveTexture(gl.TEXTURE1)
+		// gl.BindTexture(gl.TEXTURE_2D, texture2)
 
 		gl.UseProgram(shader_program)
 
 		t := f32(glfw.GetTime())
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), 800/600, 0.1, 100)
-		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 		view := camera_view_matrix(&camera)
+		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
 		// render boxes
-		gl.BindVertexArray(vao)
-		for i in 0..<10 {
-			model := glm.mat4Translate(cube_positions[i])
-			angle := 20 * f32(i)
-			if i % 3 == 0 {
-				model *= glm.mat4Rotate(glm.vec3{0.5, 1.0, 0.0}, glm.radians_f32(50 + angle) * t)
-			} else {
-				model *= glm.mat4Rotate(glm.vec3{1, 0.3, 0.5}, glm.radians_f32(angle))
-			}
-			gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+		cube_model := glm.mat4Scale({1, 1, 1})
+		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&cube_model))
+		gl.BindVertexArray(cube_vao)
+		gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		// for i in 0..<10 {
+		// 	model := glm.mat4Translate(cube_positions[i])
+		// 	angle := 20 * f32(i)
+		// 	if i % 3 == 0 {
+		// 		model *= glm.mat4Rotate(glm.vec3{0.5, 1.0, 0.0}, glm.radians_f32(50 + angle) * t)
+		// 	} else {
+		// 		model *= glm.mat4Rotate(glm.vec3{1, 0.3, 0.5}, glm.radians_f32(angle))
+		// 	}
+		// 	gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
+		//
+		// 	gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		// }
 
-			gl.DrawArrays(gl.TRIANGLES, 0, 36)
-		}
+		gl.UseProgram(light_shader_program)
+		gl.UniformMatrix4fv(lightProjectionLoc, 1, gl.FALSE, raw_data(&projection))
+		gl.UniformMatrix4fv(lightViewLoc, 1, gl.FALSE, raw_data(&view))
+		gl.BindVertexArray(light_vao)
+		model := glm.mat4Translate(light_pos)
+		model *= glm.mat4Scale({0.2, 0.2, 0.2})
+		gl.UniformMatrix4fv(lightModelLoc, 1, gl.FALSE, raw_data(&model))
+		gl.DrawArrays(gl.TRIANGLES, 0, 36)
 
 		// sint := glm.sin(t)
 		// trans2 := glm.mat4Translate({-0.5, 0.5, 0.0})
