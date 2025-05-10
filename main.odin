@@ -25,47 +25,47 @@ first_mouse := true
 light_pos := glm.vec3{1.2, 1.0, 2.0}
 
 vertices := [?]f32 {
-	-0.5, -0.5, -0.5,
-     0.5, -0.5, -0.5,
-     0.5,  0.5, -0.5,
-     0.5,  0.5, -0.5,
-    -0.5,  0.5, -0.5,
-    -0.5, -0.5, -0.5,
+	-0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
+     0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
+     0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
+     0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
+    -0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
+    -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
 
-    -0.5, -0.5,  0.5,
-     0.5, -0.5,  0.5,
-     0.5,  0.5,  0.5,
-     0.5,  0.5,  0.5,
-    -0.5,  0.5,  0.5,
-    -0.5, -0.5,  0.5,
+    -0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
+     0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
+     0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
+     0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
+    -0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
+    -0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
 
-    -0.5,  0.5,  0.5,
-    -0.5,  0.5, -0.5,
-    -0.5, -0.5, -0.5,
-    -0.5, -0.5, -0.5,
-    -0.5, -0.5,  0.5,
-    -0.5,  0.5,  0.5,
+    -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,
+    -0.5,  0.5, -0.5, -1.0,  0.0,  0.0,
+    -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,
+    -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,
+    -0.5, -0.5,  0.5, -1.0,  0.0,  0.0,
+    -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,
 
-     0.5,  0.5,  0.5,
-     0.5,  0.5, -0.5,
-     0.5, -0.5, -0.5,
-     0.5, -0.5, -0.5,
-     0.5, -0.5,  0.5,
-     0.5,  0.5,  0.5,
+     0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
+     0.5,  0.5, -0.5,  1.0,  0.0,  0.0,
+     0.5, -0.5, -0.5,  1.0,  0.0,  0.0,
+     0.5, -0.5, -0.5,  1.0,  0.0,  0.0,
+     0.5, -0.5,  0.5,  1.0,  0.0,  0.0,
+     0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
 
-    -0.5, -0.5, -0.5,
-     0.5, -0.5, -0.5,
-     0.5, -0.5,  0.5,
-     0.5, -0.5,  0.5,
-    -0.5, -0.5,  0.5,
-    -0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
+     0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
+     0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
+     0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
+    -0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
+    -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
 
-    -0.5,  0.5, -0.5,
-     0.5,  0.5, -0.5,
-     0.5,  0.5,  0.5,
-     0.5,  0.5,  0.5,
-    -0.5,  0.5,  0.5,
-    -0.5,  0.5, -0.5,
+    -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
+     0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
+     0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+     0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+    -0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
+    -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
 }
 
 main :: proc() {
@@ -113,14 +113,11 @@ main :: proc() {
 	gl.BindVertexArray(cube_vao)
 	// tell OpenGL how to read the vertex data
 	// position data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
-	// color data
-	// gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
-	// gl.EnableVertexAttribArray(1)
-	// texture coords
-	// gl.VertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 3 * size_of(f32))
-	// gl.EnableVertexAttribArray(1)
+	// normal data
+	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 3 * size_of(f32))
+	gl.EnableVertexAttribArray(1)
 
 	light_vao: u32
 	gl.GenVertexArrays(1, &light_vao)
@@ -128,7 +125,7 @@ main :: proc() {
 
 	gl.BindVertexArray(light_vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 
 	shader_program, shader_ok := gl.load_shaders("shaders/container.vert.glsl", "shaders/container.frag.glsl")
@@ -152,6 +149,7 @@ main :: proc() {
 
 	objectColorLoc := gl.GetUniformLocation(shader_program, "objectColor")
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
+	lightPosLoc := gl.GetUniformLocation(shader_program, "lightPos")
 
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
@@ -178,6 +176,7 @@ main :: proc() {
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
+		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
 		view := camera_view_matrix(&camera)
