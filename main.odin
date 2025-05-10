@@ -150,6 +150,7 @@ main :: proc() {
 	objectColorLoc := gl.GetUniformLocation(shader_program, "objectColor")
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
 	lightPosLoc := gl.GetUniformLocation(shader_program, "lightPos")
+	viewPosLoc := gl.GetUniformLocation(shader_program, "viewPos")
 
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
@@ -177,6 +178,7 @@ main :: proc() {
 		gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
 		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
+		gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
 		view := camera_view_matrix(&camera)
