@@ -3,6 +3,7 @@ package learnopengl
 import "base:runtime"
 
 import "core:fmt"
+import "core:math/linalg"
 import glm "core:math/linalg/glsl"
 
 import "vendor:glfw"
@@ -182,7 +183,7 @@ main :: proc() {
 		gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
 		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
-		gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
+		// gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
 		view := camera_view_matrix(&camera)
