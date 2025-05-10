@@ -159,6 +159,7 @@ main :: proc() {
 	lightDirLoc := gl.GetUniformLocation(shader_program, "light.direction")
 	lightPosLoc := gl.GetUniformLocation(shader_program, "light.position")
 	lightCutoffLoc := gl.GetUniformLocation(shader_program, "light.cutOff")
+	lightOuterCutoffLoc := gl.GetUniformLocation(shader_program, "light.outerCutOff")
 
 	lightAmbientLoc := gl.GetUniformLocation(shader_program, "light.ambient")
 	lightDiffuseLoc := gl.GetUniformLocation(shader_program, "light.diffuse")
@@ -228,6 +229,7 @@ main :: proc() {
 		gl.Uniform3fv(lightPosLoc, 1, raw_data(&camera.pos))
 		gl.Uniform3fv(lightDirLoc, 1, raw_data(&camera.front))
 		gl.Uniform1f(lightCutoffLoc, glm.cos(glm.radians_f32(12.5)))
+		gl.Uniform1f(lightOuterCutoffLoc, glm.cos(glm.radians_f32(17.5)))
 
 		gl.Uniform3f(lightAmbientLoc, 0.1, 0.1, 0.1)
 		gl.Uniform3f(lightDiffuseLoc, 0.8, 0.8, 0.8)
