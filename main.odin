@@ -69,6 +69,19 @@ vertices := [?]f32 {
     -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
 }
 
+cube_positions := [?]glm.vec3{
+	{ 0.0,  0.0,   0.0},
+    { 2.0,  5.0, -15.0},
+    {-1.5, -2.2,  -2.5},
+    {-3.8, -2.0, -12.3},
+    { 2.4, -0.4,  -3.5},
+    {-1.7,  3.0,  -7.5},
+    { 1.3, -2.0,  -2.5},
+    { 1.5,  2.0,  -2.5},
+    { 1.5,  0.2,  -1.5},
+    {-1.3,  1.0,  -1.5},
+}
+
 main :: proc() {
 	glfw.InitHint(glfw.PLATFORM, glfw.PLATFORM_X11)
 	if !glfw.Init() {
@@ -143,10 +156,10 @@ main :: proc() {
 
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
 
+	lightDirLoc := gl.GetUniformLocation(shader_program, "light.direction")
 	lightAmbientLoc := gl.GetUniformLocation(shader_program, "light.ambient")
 	lightDiffuseLoc := gl.GetUniformLocation(shader_program, "light.diffuse")
 	lightSpecularLoc := gl.GetUniformLocation(shader_program, "light.specular")
-	lightPosLoc := gl.GetUniformLocation(shader_program, "lightPos")
 
 	diffuseLoc := gl.GetUniformLocation(shader_program, "material.diffuse")
 	specularLoc := gl.GetUniformLocation(shader_program, "material.specular")
@@ -155,6 +168,8 @@ main :: proc() {
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
 	projectionLoc := gl.GetUniformLocation(shader_program, "projection")
+
+	viewPosLoc := gl.GetUniformLocation(shader_program, "viewPos")
 
 	lightModelLoc := gl.GetUniformLocation(light_shader_program, "model")
 	lightViewLoc := gl.GetUniformLocation(light_shader_program, "view")
@@ -166,6 +181,8 @@ main :: proc() {
 	gl.UseProgram(shader_program)
 	gl.Uniform1i(diffuseLoc, 0)
 	gl.Uniform1i(specularLoc, 1)
+
+	gl.Uniform3f(lightDirLoc, -0.2, -1.0, -0.3)
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -195,8 +212,7 @@ main :: proc() {
 
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
-		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
-		// gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
+		gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
 
 		gl.Uniform3f(lightAmbientLoc, 0.2, 0.2, 0.2)
 		gl.Uniform3f(lightDiffuseLoc, 0.5, 0.5, 0.5)
@@ -209,16 +225,20 @@ main :: proc() {
 		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
-		cube_model := glm.mat4Rotate({1.5, 1.75, 1.5}, glm.radians_f32(-45))
-		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&cube_model))
-
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, diffuse_map)
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, specular_map)
 
 		gl.BindVertexArray(cube_vao)
-		gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		for i in 0..<len(cube_positions) {
+			cube_model := glm.mat4Translate(cube_positions[i])
+			angle := 20 * i
+			cube_model *= glm.mat4Rotate({1, 0.3, 0.5}, glm.radians(f32(angle)))
+			gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&cube_model))
+
+			gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		}
 
 		gl.UseProgram(light_shader_program)
 		gl.UniformMatrix4fv(lightProjectionLoc, 1, gl.FALSE, raw_data(&projection))
