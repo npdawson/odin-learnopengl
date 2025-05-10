@@ -129,29 +129,26 @@ main :: proc() {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 
-	shader_program, shader_ok := gl.load_shaders("shaders/container.vert.glsl", "shaders/container.frag.glsl")
-	if !shader_ok {
-		msg, shader := gl.get_last_error_message()
-		fmt.eprintln(shader, "compile error:", msg)
-		panic("failed loading shaders")
-	}
+	shader_program := shader_create("shaders/container.vert.glsl", "shaders/container.frag.glsl")
 	defer gl.DeleteProgram(shader_program)
 
-	light_shader_program, light_shader_ok := gl.load_shaders("shaders/light.vert.glsl", "shaders/light.frag.glsl")
-	if !light_shader_ok {
-		msg, shader := gl.get_last_error_message()
-		fmt.eprintln(shader, "compile error:", msg)
-		panic("failed loading light shaders")
-	}
+	light_shader_program := shader_create("shaders/light.vert.glsl", "shaders/light.frag.glsl")
 	defer gl.DeleteProgram(light_shader_program)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 
-	objectColorLoc := gl.GetUniformLocation(shader_program, "objectColor")
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
+
+	lightAmbientLoc := gl.GetUniformLocation(shader_program, "light.ambient")
+	lightDiffuseLoc := gl.GetUniformLocation(shader_program, "light.diffuse")
+	lightSpecularLoc := gl.GetUniformLocation(shader_program, "light.specular")
 	lightPosLoc := gl.GetUniformLocation(shader_program, "lightPos")
-	viewPosLoc := gl.GetUniformLocation(shader_program, "viewPos")
+
+	ambientLoc := gl.GetUniformLocation(shader_program, "material.ambient")
+	diffuseLoc := gl.GetUniformLocation(shader_program, "material.diffuse")
+	specularLoc := gl.GetUniformLocation(shader_program, "material.specular")
+	shinyLoc := gl.GetUniformLocation(shader_program, "material.shininess")
 
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
@@ -180,9 +177,16 @@ main :: proc() {
 		light_pos.z = cast(f32)glm.sin(current_frame) * 2
 
 		gl.UseProgram(shader_program)
-		gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
 		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
+		gl.Uniform3f(ambientLoc, 1.0, 0.5, 0.31)
+		gl.Uniform3f(diffuseLoc, 1.0, 0.5, 0.31)
+		gl.Uniform3f(specularLoc, 0.5, 0.5, 0.5)
+		gl.Uniform1f(shinyLoc, 32)
+		gl.Uniform3f(lightAmbientLoc, 0.2, 0.2, 0.2)
+		gl.Uniform3f(lightDiffuseLoc, 0.5, 0.5, 0.5)
+		gl.Uniform3f(lightSpecularLoc, 1.0, 1.0, 1.0)
+
 		// gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
