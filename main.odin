@@ -156,8 +156,10 @@ main :: proc() {
 
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
 
-	// lightDirLoc := gl.GetUniformLocation(shader_program, "light.direction")
+	lightDirLoc := gl.GetUniformLocation(shader_program, "light.direction")
 	lightPosLoc := gl.GetUniformLocation(shader_program, "light.position")
+	lightCutoffLoc := gl.GetUniformLocation(shader_program, "light.cutOff")
+
 	lightAmbientLoc := gl.GetUniformLocation(shader_program, "light.ambient")
 	lightDiffuseLoc := gl.GetUniformLocation(shader_program, "light.diffuse")
 	lightSpecularLoc := gl.GetUniformLocation(shader_program, "light.specular")
@@ -221,11 +223,14 @@ main :: proc() {
 
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
-		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
 		gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
 
-		gl.Uniform3f(lightAmbientLoc, 0.2, 0.2, 0.2)
-		gl.Uniform3f(lightDiffuseLoc, 0.5, 0.5, 0.5)
+		gl.Uniform3fv(lightPosLoc, 1, raw_data(&camera.pos))
+		gl.Uniform3fv(lightDirLoc, 1, raw_data(&camera.front))
+		gl.Uniform1f(lightCutoffLoc, glm.cos(glm.radians_f32(12.5)))
+
+		gl.Uniform3f(lightAmbientLoc, 0.1, 0.1, 0.1)
+		gl.Uniform3f(lightDiffuseLoc, 0.8, 0.8, 0.8)
 		gl.Uniform3f(lightSpecularLoc, 1.0, 1.0, 1.0)
 
 		gl.Uniform1f(shinyLoc, 32)
