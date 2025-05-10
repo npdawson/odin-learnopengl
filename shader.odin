@@ -13,3 +13,7 @@ shader_create :: proc(vert_path, frag_path: string) -> u32 {
 	}
 	return shader_program
 }
+
+uniform :: proc(shader: u32, name: cstring) -> i32 {
+	return gl.GetUniformLocation(shader, name)
+}
