@@ -174,6 +174,10 @@ main :: proc() {
 		gl.ClearColor(.1, .1, .1, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+		light_pos.x = cast(f32)glm.cos(current_frame) * 2
+		light_pos.y = cast(f32)glm.cos(current_frame) * 2
+		light_pos.z = cast(f32)glm.sin(current_frame) * 2
+
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
