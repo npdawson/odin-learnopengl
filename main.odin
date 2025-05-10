@@ -12,8 +12,11 @@ import stb "vendor:stb/image"
 delta_time: f64
 last_frame: f64
 
-last_x: f32
-last_y: f32
+SCREEN_WIDTH :: 800
+SCREEN_HEIGHT :: 600
+
+last_x: f32 = SCREEN_WIDTH / 2
+last_y: f32 = SCREEN_HEIGHT / 2
 
 camera := camera_create(glm.vec3{0, 0, 3})
 
@@ -76,13 +79,17 @@ main :: proc() {
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 6)
 	glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
 
-	window := glfw.CreateWindow(800, 600, "LearnOpenGL", nil, nil)
+	window := glfw.CreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", nil, nil)
 	if window == nil {
 		fmt.eprintln("failed to create GLFW window")
 		glfw.Terminate()
 		panic("glfw window error")
 	}
 	glfw.MakeContextCurrent(window)
+	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
+	glfw.SetErrorCallback(error_callback)
+	glfw.SetCursorPosCallback(window, mouse_callback)
+	glfw.SetScrollCallback(window, scroll_callback)
 
 	glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
@@ -90,20 +97,11 @@ main :: proc() {
 	// functions and after the window is made the current context
 	gl.load_up_to(4, 6, glfw.gl_set_proc_address)
 
-	gl.Viewport(0, 0, 800, 600)
 	gl.Enable(gl.DEPTH_TEST)
-	glfw.SetWindowSizeCallback(window, framebuffer_size_callback)
-	glfw.SetErrorCallback(error_callback)
-	glfw.SetCursorPosCallback(window, mouse_callback)
-	glfw.SetScrollCallback(window, scroll_callback)
 
 	cube_vao: u32
 	gl.GenVertexArrays(1, &cube_vao)
 	defer gl.DeleteVertexArrays(1, &cube_vao)
-
-	light_vao: u32
-	gl.GenVertexArrays(1, &light_vao)
-	defer gl.DeleteVertexArrays(1, &light_vao)
 
 	vbo: u32
 	gl.GenBuffers(1, &vbo)
@@ -123,6 +121,10 @@ main :: proc() {
 	// texture coords
 	// gl.VertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 5 * size_of(f32), 3 * size_of(f32))
 	// gl.EnableVertexAttribArray(1)
+
+	light_vao: u32
+	gl.GenVertexArrays(1, &light_vao)
+	defer gl.DeleteVertexArrays(1, &light_vao)
 
 	gl.BindVertexArray(light_vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
@@ -148,77 +150,15 @@ main :: proc() {
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 
-	// create a texture in GL
-	texture1: u32
-	gl.GenTextures(1, &texture1)
-	gl.BindTexture(gl.TEXTURE_2D, texture1)
-	// set texture wrap/filter options on currently bound texture object
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-	// load image from file, get w, h, and number of color channels
-	width, height, n_channels: i32
-	stb.set_flip_vertically_on_load(1)
-	data := stb.load("textures/container.jpg", &width, &height, &n_channels, 0)
-	if data != nil {
-		// load image data into texture
-		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, data)
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-	} else {
-		fmt.eprintln("failed to load texture")
-	}
-	// don't need the image data anymore
-	stb.image_free(data)
-
-	// load a 2nd texture
-	texture2: u32
-	gl.GenTextures(1, &texture2)
-	gl.BindTexture(gl.TEXTURE_2D, texture2)
-	// set texture wrap/filter options on currently bound texture object
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-	// load image from file, get w, h, and number of color channels
-	data = stb.load("textures/awesomeface.png", &width, &height, &n_channels, 0)
-	if data != nil {
-		// load image data into texture
-		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-	} else {
-		fmt.eprintln("failed to load texture")
-	}
-	// don't need the image data anymore
-	stb.image_free(data)
-
-	gl.UseProgram(shader_program)
 	objectColorLoc := gl.GetUniformLocation(shader_program, "objectColor")
 	lightColorLoc := gl.GetUniformLocation(shader_program, "lightColor")
-	gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
-	gl.Uniform3f(lightColorLoc, 1, 1, 1)
-	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture1"), 0)
-	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture2"), 1)
-	// transLoc := gl.GetUniformLocation(shader_program, "transform")
 
-	// model: local -> world coords
-	// model := glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(-55))
-	// view: world -> view coords
-	// view := glm.mat4Translate({0, 0, -3})
-	// view *= glm.mat4Rotate({1.0, 0.0, 0.0}, glm.radians_f32(25))
-	// projection: view -> clip coords
-	// projection := glm.mat4Perspective(glm.radians(fov), 800/600, 0.1, 100)
 	modelLoc := gl.GetUniformLocation(shader_program, "model")
-	// gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
 	viewLoc := gl.GetUniformLocation(shader_program, "view")
-	// gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 	projectionLoc := gl.GetUniformLocation(shader_program, "projection")
+
 	lightModelLoc := gl.GetUniformLocation(light_shader_program, "model")
-	// gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
 	lightViewLoc := gl.GetUniformLocation(light_shader_program, "view")
-	// gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 	lightProjectionLoc := gl.GetUniformLocation(light_shader_program, "projection")
 
 	// render loop
@@ -235,17 +175,11 @@ main :: proc() {
 		gl.ClearColor(.1, .1, .1, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		// bind texture
-		// gl.ActiveTexture(gl.TEXTURE0)
-		// gl.BindTexture(gl.TEXTURE_2D, texture1)
-		// gl.ActiveTexture(gl.TEXTURE1)
-		// gl.BindTexture(gl.TEXTURE_2D, texture2)
-
 		gl.UseProgram(shader_program)
+		gl.Uniform3f(objectColorLoc, 1, 0.5, 0.31)
+		gl.Uniform3f(lightColorLoc, 1, 1, 1)
 
-		t := f32(glfw.GetTime())
-
-		projection := glm.mat4Perspective(glm.radians(camera.zoom), 800/600, 0.1, 100)
+		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
 		view := camera_view_matrix(&camera)
 		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
@@ -255,18 +189,6 @@ main :: proc() {
 		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&cube_model))
 		gl.BindVertexArray(cube_vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 36)
-		// for i in 0..<10 {
-		// 	model := glm.mat4Translate(cube_positions[i])
-		// 	angle := 20 * f32(i)
-		// 	if i % 3 == 0 {
-		// 		model *= glm.mat4Rotate(glm.vec3{0.5, 1.0, 0.0}, glm.radians_f32(50 + angle) * t)
-		// 	} else {
-		// 		model *= glm.mat4Rotate(glm.vec3{1, 0.3, 0.5}, glm.radians_f32(angle))
-		// 	}
-		// 	gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&model))
-		//
-		// 	gl.DrawArrays(gl.TRIANGLES, 0, 36)
-		// }
 
 		gl.UseProgram(light_shader_program)
 		gl.UniformMatrix4fv(lightProjectionLoc, 1, gl.FALSE, raw_data(&projection))
@@ -276,12 +198,6 @@ main :: proc() {
 		model *= glm.mat4Scale({0.2, 0.2, 0.2})
 		gl.UniformMatrix4fv(lightModelLoc, 1, gl.FALSE, raw_data(&model))
 		gl.DrawArrays(gl.TRIANGLES, 0, 36)
-
-		// sint := glm.sin(t)
-		// trans2 := glm.mat4Translate({-0.5, 0.5, 0.0})
-		// trans2 *= glm.mat4Scale({sint, sint, sint})
-		// gl.UniformMatrix4fv(transLoc, 1, gl.FALSE, raw_data(&trans2))
-		// gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
