@@ -3,7 +3,6 @@ package learnopengl
 import "base:runtime"
 
 import "core:fmt"
-import "core:math/linalg"
 import glm "core:math/linalg/glsl"
 
 import "vendor:glfw"
@@ -26,47 +25,48 @@ first_mouse := true
 light_pos := glm.vec3{1.2, 1.0, 2.0}
 
 vertices := [?]f32 {
-	-0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
-     0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
-     0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
-     0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
-    -0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
-    -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
+	// positions          // normals           // texture coords
+    -0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 0.0,
+     0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 0.0,
+     0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 1.0,
+     0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 1.0,
+    -0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 1.0,
+    -0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 0.0,
 
-    -0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
-     0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
-     0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
-     0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
-    -0.5,  0.5,  0.5,  0.0,  0.0, 1.0,
-    -0.5, -0.5,  0.5,  0.0,  0.0, 1.0,
+    -0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 0.0,
+     0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 0.0,
+     0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 1.0,
+     0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 1.0,
+    -0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 1.0,
+    -0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 0.0,
 
-    -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,
-    -0.5,  0.5, -0.5, -1.0,  0.0,  0.0,
-    -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,
-    -0.5, -0.5, -0.5, -1.0,  0.0,  0.0,
-    -0.5, -0.5,  0.5, -1.0,  0.0,  0.0,
-    -0.5,  0.5,  0.5, -1.0,  0.0,  0.0,
+    -0.5,  0.5,  0.5,	 -1.0,  0.0,  0.0,	   1.0, 0.0,
+    -0.5,  0.5, -0.5,	 -1.0,  0.0,  0.0,	   1.0, 1.0,
+    -0.5, -0.5, -0.5,	 -1.0,  0.0,  0.0,	   0.0, 1.0,
+    -0.5, -0.5, -0.5,	 -1.0,  0.0,  0.0,	   0.0, 1.0,
+    -0.5, -0.5,  0.5,	 -1.0,  0.0,  0.0,	   0.0, 0.0,
+    -0.5,  0.5,  0.5,	 -1.0,  0.0,  0.0,	   1.0, 0.0,
 
-     0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
-     0.5,  0.5, -0.5,  1.0,  0.0,  0.0,
-     0.5, -0.5, -0.5,  1.0,  0.0,  0.0,
-     0.5, -0.5, -0.5,  1.0,  0.0,  0.0,
-     0.5, -0.5,  0.5,  1.0,  0.0,  0.0,
-     0.5,  0.5,  0.5,  1.0,  0.0,  0.0,
+     0.5,  0.5,  0.5,	  1.0,  0.0,  0.0,	   1.0, 0.0,
+     0.5,  0.5, -0.5,	  1.0,  0.0,  0.0,	   1.0, 1.0,
+     0.5, -0.5, -0.5,	  1.0,  0.0,  0.0,	   0.0, 1.0,
+     0.5, -0.5, -0.5,	  1.0,  0.0,  0.0,	   0.0, 1.0,
+     0.5, -0.5,  0.5,	  1.0,  0.0,  0.0,	   0.0, 0.0,
+     0.5,  0.5,  0.5,	  1.0,  0.0,  0.0,	   1.0, 0.0,
 
-    -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
-     0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
-     0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
-     0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
-    -0.5, -0.5,  0.5,  0.0, -1.0,  0.0,
-    -0.5, -0.5, -0.5,  0.0, -1.0,  0.0,
+    -0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   0.0, 1.0,
+     0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   1.0, 1.0,
+     0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   1.0, 0.0,
+     0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   1.0, 0.0,
+    -0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   0.0, 0.0,
+    -0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   0.0, 1.0,
 
-    -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
-     0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
-     0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
-     0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
-    -0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
-    -0.5,  0.5, -0.5,  0.0,  1.0,  0.0,
+    -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
+     0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   1.0, 1.0,
+     0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   1.0, 0.0,
+     0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   1.0, 0.0,
+    -0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   0.0, 0.0,
+    -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
 }
 
 main :: proc() {
@@ -100,6 +100,12 @@ main :: proc() {
 
 	gl.Enable(gl.DEPTH_TEST)
 
+	shader_program := shader_create("shaders/container.vert.glsl", "shaders/container.frag.glsl")
+	defer gl.DeleteProgram(shader_program)
+
+	light_shader_program := shader_create("shaders/light.vert.glsl", "shaders/light.frag.glsl")
+	defer gl.DeleteProgram(light_shader_program)
+
 	cube_vao: u32
 	gl.GenVertexArrays(1, &cube_vao)
 	defer gl.DeleteVertexArrays(1, &cube_vao)
@@ -114,11 +120,14 @@ main :: proc() {
 	gl.BindVertexArray(cube_vao)
 	// tell OpenGL how to read the vertex data
 	// position data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
 	// normal data
-	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 3 * size_of(f32))
+	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
 	gl.EnableVertexAttribArray(1)
+	// texture data
+	gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 6 * size_of(f32))
+	gl.EnableVertexAttribArray(2)
 
 	light_vao: u32
 	gl.GenVertexArrays(1, &light_vao)
@@ -126,14 +135,8 @@ main :: proc() {
 
 	gl.BindVertexArray(light_vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
 	gl.EnableVertexAttribArray(0)
-
-	shader_program := shader_create("shaders/container.vert.glsl", "shaders/container.frag.glsl")
-	defer gl.DeleteProgram(shader_program)
-
-	light_shader_program := shader_create("shaders/light.vert.glsl", "shaders/light.frag.glsl")
-	defer gl.DeleteProgram(light_shader_program)
 
 	// wireframe mode
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
@@ -145,7 +148,6 @@ main :: proc() {
 	lightSpecularLoc := gl.GetUniformLocation(shader_program, "light.specular")
 	lightPosLoc := gl.GetUniformLocation(shader_program, "lightPos")
 
-	ambientLoc := gl.GetUniformLocation(shader_program, "material.ambient")
 	diffuseLoc := gl.GetUniformLocation(shader_program, "material.diffuse")
 	specularLoc := gl.GetUniformLocation(shader_program, "material.specular")
 	shinyLoc := gl.GetUniformLocation(shader_program, "material.shininess")
@@ -157,6 +159,13 @@ main :: proc() {
 	lightModelLoc := gl.GetUniformLocation(light_shader_program, "model")
 	lightViewLoc := gl.GetUniformLocation(light_shader_program, "view")
 	lightProjectionLoc := gl.GetUniformLocation(light_shader_program, "projection")
+
+	diffuse_map := load_texture("resources/textures/container2.png")
+	specular_map := load_texture("resources/textures/container2_specular.png")
+
+	gl.UseProgram(shader_program)
+	gl.Uniform1i(diffuseLoc, 0)
+	gl.Uniform1i(specularLoc, 1)
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -172,49 +181,54 @@ main :: proc() {
 		gl.ClearColor(.1, .1, .1, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		light_pos.x = cast(f32)glm.cos(current_frame) * 2
-		light_pos.y = cast(f32)glm.cos(current_frame) * 2
-		light_pos.z = cast(f32)glm.sin(current_frame) * 2
+		light_pos.x = cast(f32)glm.sin(current_frame) * 2
+		light_pos.y = 0
+		light_pos.z = cast(f32)glm.cos(current_frame) * 2
 
-		light_color: glm.vec3
-		light_color.x = cast(f32)glm.sin(current_frame * 2)
-		light_color.y = cast(f32)glm.sin(current_frame * 0.7)
-		light_color.z = cast(f32)glm.sin(current_frame * 1.3)
-
-		diffuse_color := light_color * 0.5
-		ambient_color := diffuse_color * 0.2
+		// light_color: glm.vec3
+		// light_color.x = cast(f32)glm.sin(current_frame * 2)
+		// light_color.y = cast(f32)glm.sin(current_frame * 0.7)
+		// light_color.z = cast(f32)glm.sin(current_frame * 1.3)
+		//
+		// diffuse_color := light_color * 0.5
+		// ambient_color := diffuse_color * 0.2
 
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
 		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
-		gl.Uniform3f(ambientLoc, 1.0, 0.5, 0.31)
-		gl.Uniform3f(diffuseLoc, 1.0, 0.5, 0.31)
-		gl.Uniform3f(specularLoc, 0.5, 0.5, 0.5)
-		gl.Uniform1f(shinyLoc, 32)
-		gl.Uniform3fv(lightAmbientLoc, 1, raw_data(&ambient_color))
-		gl.Uniform3fv(lightDiffuseLoc, 1, raw_data(&diffuse_color))
+		// gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
+
+		gl.Uniform3f(lightAmbientLoc, 0.2, 0.2, 0.2)
+		gl.Uniform3f(lightDiffuseLoc, 0.5, 0.5, 0.5)
 		gl.Uniform3f(lightSpecularLoc, 1.0, 1.0, 1.0)
 
-		// gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
+		gl.Uniform1f(shinyLoc, 32)
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
 		view := camera_view_matrix(&camera)
 		gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
-		// render boxes
 		cube_model := glm.mat4Rotate({1.5, 1.75, 1.5}, glm.radians_f32(-45))
 		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&cube_model))
+
+		gl.ActiveTexture(gl.TEXTURE0)
+		gl.BindTexture(gl.TEXTURE_2D, diffuse_map)
+		gl.ActiveTexture(gl.TEXTURE1)
+		gl.BindTexture(gl.TEXTURE_2D, specular_map)
+
 		gl.BindVertexArray(cube_vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 36)
 
 		gl.UseProgram(light_shader_program)
 		gl.UniformMatrix4fv(lightProjectionLoc, 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(lightViewLoc, 1, gl.FALSE, raw_data(&view))
-		gl.BindVertexArray(light_vao)
+
 		model := glm.mat4Translate(light_pos)
 		model *= glm.mat4Scale({0.2, 0.2, 0.2})
 		gl.UniformMatrix4fv(lightModelLoc, 1, gl.FALSE, raw_data(&model))
+
+		gl.BindVertexArray(light_vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 36)
 
 		// check and call events and swap buffers
@@ -271,4 +285,38 @@ mouse_callback :: proc "c" (window: glfw.WindowHandle, x_in, y_in: f64) {
 
 scroll_callback :: proc "c" (window: glfw.WindowHandle, xoffset, yoffset: f64) {
 	process_scroll(&camera, cast(f32)yoffset)
+}
+
+load_texture :: proc(path: cstring) -> u32 {
+	texture_id: u32
+	gl.GenTextures(1, &texture_id)
+
+	width, height, num_components: i32
+	data := stb.load(path, &width, &height, &num_components, 0)
+	if data != nil {
+		format: i32
+		switch num_components {
+		case 1:
+			format = gl.RED
+		case 3:
+			format = gl.RGB
+		case 4:
+			format = gl.RGBA
+		}
+		gl.BindTexture(gl.TEXTURE_2D, texture_id)
+		gl.TexImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, u32(format), gl.UNSIGNED_BYTE, data)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+		stb.image_free(data)
+	} else {
+		fmt.eprintln("failed to load texture:", path)
+		stb.image_free(data)
+	}
+
+	return texture_id
 }
