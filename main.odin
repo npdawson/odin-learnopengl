@@ -176,6 +176,14 @@ main :: proc() {
 		light_pos.y = cast(f32)glm.cos(current_frame) * 2
 		light_pos.z = cast(f32)glm.sin(current_frame) * 2
 
+		light_color: glm.vec3
+		light_color.x = cast(f32)glm.sin(current_frame * 2)
+		light_color.y = cast(f32)glm.sin(current_frame * 0.7)
+		light_color.z = cast(f32)glm.sin(current_frame * 1.3)
+
+		diffuse_color := light_color * 0.5
+		ambient_color := diffuse_color * 0.2
+
 		gl.UseProgram(shader_program)
 		gl.Uniform3f(lightColorLoc, 1, 1, 1)
 		gl.Uniform3fv(lightPosLoc, 1, raw_data(&light_pos))
@@ -183,8 +191,8 @@ main :: proc() {
 		gl.Uniform3f(diffuseLoc, 1.0, 0.5, 0.31)
 		gl.Uniform3f(specularLoc, 0.5, 0.5, 0.5)
 		gl.Uniform1f(shinyLoc, 32)
-		gl.Uniform3f(lightAmbientLoc, 0.2, 0.2, 0.2)
-		gl.Uniform3f(lightDiffuseLoc, 0.5, 0.5, 0.5)
+		gl.Uniform3fv(lightAmbientLoc, 1, raw_data(&ambient_color))
+		gl.Uniform3fv(lightDiffuseLoc, 1, raw_data(&diffuse_color))
 		gl.Uniform3f(lightSpecularLoc, 1.0, 1.0, 1.0)
 
 		// gl.Uniform3fv(viewPosLoc, 1, raw_data(&camera.pos))
@@ -195,7 +203,7 @@ main :: proc() {
 		gl.UniformMatrix4fv(viewLoc, 1, gl.FALSE, raw_data(&view))
 
 		// render boxes
-		cube_model := glm.mat4Scale({1, 1, 1})
+		cube_model := glm.mat4Rotate({1.5, 1.75, 1.5}, glm.radians_f32(-45))
 		gl.UniformMatrix4fv(modelLoc, 1, gl.FALSE, raw_data(&cube_model))
 		gl.BindVertexArray(cube_vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, 36)
