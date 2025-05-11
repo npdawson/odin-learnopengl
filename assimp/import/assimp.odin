@@ -163,7 +163,7 @@ foreign assimp {
 	@(link_name = "aiGetMaterialTextureCount")
 	get_material_textureCount :: proc(pMat: ^aiMaterial, type: aiTextureType) -> u32 ---
 	@(link_name = "aiGetMaterialTexture")
-	get_material_texture :: proc(mat: ^aiMaterial, type: aiTextureType, index: u32, path: ^aiString, mapping: ^aiTextureMapping, uvindex: ^u32, blend: ^f64, op: ^aiTextureOp, mapmode: ^aiTextureMapMode) -> aiReturn ---
+	get_material_texture :: proc(mat: ^aiMaterial, type: aiTextureType, index: u32, path: ^aiString, mapping: ^aiTextureMapping = nil, uvindex: ^u32 = nil, blend: ^f64 = nil, op: ^aiTextureOp = nil, mapmode: ^aiTextureMapMode = nil) -> aiReturn ---
 
 	// @(link_name="aiImportFileEx")              import_fileex :: proc(pFile:cstring,pFlags: u32,pFS: ^aiFileIO) -> ^aiScene ---;
 	// @(link_name="aiGetPredefinedLogStream")    get_predefined_log_stream :: proc(pStreams: aiDefaultLogStream,file:cstring) -> aiLogStream ---;
