@@ -17,6 +17,9 @@ Model :: struct {
 	gamma_correction: bool
 }
 
+textures_skipped := 0
+total_textures := 0
+
 model_load :: proc(path: string) -> (model: Model) {
 	flags := ai.PostProcessSteps.Triangulate |
 			 ai.PostProcessSteps.GenSmoothNormals |
@@ -30,6 +33,7 @@ model_load :: proc(path: string) -> (model: Model) {
 	model.directory = fp.dir(path)
 	model.meshes = make_dynamic_array_len_cap([dynamic]Mesh, 0, scene.mNumMeshes)
 	process_node(&model, scene.mRootNode, scene)
+	fmt.printfln("skipped %v textures out of %v loading model at %v", textures_skipped, total_textures, path)
 	return model
 }
 
@@ -53,8 +57,8 @@ process_node :: proc(model: ^Model, node: ^ai.Node, scene: ^ai.Scene) {
 }
 
 @(private="file")
-process_mesh :: proc(model: ^Model, mesh: ^ai.Mesh, scene: ^ai.Scene) -> (new_mesh: Mesh) {
-	new_mesh.vertices = make_slice([]Vertex, mesh.mNumVertices)
+process_mesh :: proc(model: ^Model, mesh: ^ai.Mesh, scene: ^ai.Scene) -> Mesh {
+	vertices := make_slice([]Vertex, mesh.mNumVertices)
 	for i in 0..<mesh.mNumVertices {
 		vertex: Vertex
 		vertex.position = mesh.mVertices[i]
@@ -67,17 +71,17 @@ process_mesh :: proc(model: ^Model, mesh: ^ai.Mesh, scene: ^ai.Scene) -> (new_me
 			vertex.bitangent = mesh.mBitangents[i]
 		}
 		// TODO: bones?
-		new_mesh.vertices[i] = vertex
+		vertices[i] = vertex
 	}
-	new_mesh.indices = make_slice([]u32, mesh.mNumFaces)
+	indices := make_slice([]u32, mesh.mNumFaces * 3)
 	for i in 0..<mesh.mNumFaces {
 		face := mesh.mFaces[i]
 		for j in 0..<face.mNumIndices {
-			new_mesh.indices[3 * i + j] = face.mIndices[j]
+			indices[3 * i + j] = face.mIndices[j]
 		}
 	}
+	textures := make_dynamic_array([dynamic]Texture)
 	if mesh.mMaterialIndex >= 0 {
-		textures := make_dynamic_array([dynamic]Texture)
 		material := scene.mMaterials[mesh.mMaterialIndex]
 		diffuse_maps := load_material_textures(model, material, .DIFFUSE)
 		append_elems(&textures, ..diffuse_maps)
@@ -87,9 +91,8 @@ process_mesh :: proc(model: ^Model, mesh: ^ai.Mesh, scene: ^ai.Scene) -> (new_me
 		append_elems(&textures, ..normal_maps)
 		height_maps := load_material_textures(model, material, .HEIGHT)
 		append_elems(&textures, ..height_maps)
-		new_mesh.textures = textures[:]
 	}
-	return new_mesh
+	return mesh_create(vertices, indices, textures[:])
 }
 
 @(private="file")
@@ -99,6 +102,7 @@ load_material_textures :: proc(
 	type: ai.TextureType,
 ) -> []Texture {
 	texture_count := ai.get_material_textureCount(mat, type)
+	total_textures += cast(int)texture_count
 	textures := make_slice([]Texture, texture_count)
 	for i in 0..<texture_count {
 		str: ai.String
@@ -114,6 +118,7 @@ load_material_textures :: proc(
 			if strings.compare(texture.path, path) == 0 {
 				textures[i] = texture
 				skip = true
+				textures_skipped += 1
 				break
 			}
 		}
@@ -169,7 +174,6 @@ load_texture_from_dir :: proc(path, dir: string, gamma: bool = false) -> (id: u3
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
 	} else {
 		fmt.eprintln("failed to load texture at path:", path)
 	}

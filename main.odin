@@ -15,77 +15,75 @@ last_frame: f64
 SCREEN_WIDTH :: 800
 SCREEN_HEIGHT :: 600
 
+camera := camera_create(glm.vec3{0, 0, 3})
 last_x: f32 = SCREEN_WIDTH / 2
 last_y: f32 = SCREEN_HEIGHT / 2
-
-camera := camera_create(glm.vec3{0, 0, 3})
-
 first_mouse := true
 
-vertices := [?]f32 {
-	// positions          // normals           // texture coords
-    -0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 0.0,
-     0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 0.0,
-     0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 1.0,
-     0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 1.0,
-    -0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 1.0,
-    -0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 0.0,
-
-    -0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 0.0,
-     0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 0.0,
-     0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 1.0,
-     0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 1.0,
-    -0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 1.0,
-    -0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 0.0,
-
-    -0.5,  0.5,  0.5,	 -1.0,  0.0,  0.0,	   1.0, 0.0,
-    -0.5,  0.5, -0.5,	 -1.0,  0.0,  0.0,	   1.0, 1.0,
-    -0.5, -0.5, -0.5,	 -1.0,  0.0,  0.0,	   0.0, 1.0,
-    -0.5, -0.5, -0.5,	 -1.0,  0.0,  0.0,	   0.0, 1.0,
-    -0.5, -0.5,  0.5,	 -1.0,  0.0,  0.0,	   0.0, 0.0,
-    -0.5,  0.5,  0.5,	 -1.0,  0.0,  0.0,	   1.0, 0.0,
-
-     0.5,  0.5,  0.5,	  1.0,  0.0,  0.0,	   1.0, 0.0,
-     0.5,  0.5, -0.5,	  1.0,  0.0,  0.0,	   1.0, 1.0,
-     0.5, -0.5, -0.5,	  1.0,  0.0,  0.0,	   0.0, 1.0,
-     0.5, -0.5, -0.5,	  1.0,  0.0,  0.0,	   0.0, 1.0,
-     0.5, -0.5,  0.5,	  1.0,  0.0,  0.0,	   0.0, 0.0,
-     0.5,  0.5,  0.5,	  1.0,  0.0,  0.0,	   1.0, 0.0,
-
-    -0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   0.0, 1.0,
-     0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   1.0, 1.0,
-     0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   1.0, 0.0,
-     0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   1.0, 0.0,
-    -0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   0.0, 0.0,
-    -0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   0.0, 1.0,
-
-    -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
-     0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   1.0, 1.0,
-     0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   1.0, 0.0,
-     0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   1.0, 0.0,
-    -0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   0.0, 0.0,
-    -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
-}
-
-cube_positions := [?]glm.vec3{
-	{ 0.0,  0.0,   0.0},
-    { 2.0,  5.0, -15.0},
-    {-1.5, -2.2,  -2.5},
-    {-3.8, -2.0, -12.3},
-    { 2.4, -0.4,  -3.5},
-    {-1.7,  3.0,  -7.5},
-    { 1.3, -2.0,  -2.5},
-    { 1.5,  2.0,  -2.5},
-    { 1.5,  0.2,  -1.5},
-    {-1.3,  1.0,  -1.5},
-}
-
-point_light_positions := [?]glm.vec3{
-	{ 0.7,  0.2,   2.0},
-	{ 2.3, -3.3,  -4.0},
-	{-4.0,  2.0, -12.0},
-	{ 0.0,  0.0,  -3.0},
-}
+// vertices := [?]f32 {
+// 	// positions          // normals           // texture coords
+//     -0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 0.0,
+//      0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 0.0,
+//      0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 1.0,
+//      0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   1.0, 1.0,
+//     -0.5,  0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 1.0,
+//     -0.5, -0.5, -0.5,	  0.0,  0.0, -1.0,	   0.0, 0.0,
+//
+//     -0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 0.0,
+//      0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 0.0,
+//      0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 1.0,
+//      0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   1.0, 1.0,
+//     -0.5,  0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 1.0,
+//     -0.5, -0.5,  0.5,	  0.0,  0.0, 1.0, 	   0.0, 0.0,
+//
+//     -0.5,  0.5,  0.5,	 -1.0,  0.0,  0.0,	   1.0, 0.0,
+//     -0.5,  0.5, -0.5,	 -1.0,  0.0,  0.0,	   1.0, 1.0,
+//     -0.5, -0.5, -0.5,	 -1.0,  0.0,  0.0,	   0.0, 1.0,
+//     -0.5, -0.5, -0.5,	 -1.0,  0.0,  0.0,	   0.0, 1.0,
+//     -0.5, -0.5,  0.5,	 -1.0,  0.0,  0.0,	   0.0, 0.0,
+//     -0.5,  0.5,  0.5,	 -1.0,  0.0,  0.0,	   1.0, 0.0,
+//
+//      0.5,  0.5,  0.5,	  1.0,  0.0,  0.0,	   1.0, 0.0,
+//      0.5,  0.5, -0.5,	  1.0,  0.0,  0.0,	   1.0, 1.0,
+//      0.5, -0.5, -0.5,	  1.0,  0.0,  0.0,	   0.0, 1.0,
+//      0.5, -0.5, -0.5,	  1.0,  0.0,  0.0,	   0.0, 1.0,
+//      0.5, -0.5,  0.5,	  1.0,  0.0,  0.0,	   0.0, 0.0,
+//      0.5,  0.5,  0.5,	  1.0,  0.0,  0.0,	   1.0, 0.0,
+//
+//     -0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   0.0, 1.0,
+//      0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   1.0, 1.0,
+//      0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   1.0, 0.0,
+//      0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   1.0, 0.0,
+//     -0.5, -0.5,  0.5,	  0.0, -1.0,  0.0,	   0.0, 0.0,
+//     -0.5, -0.5, -0.5,	  0.0, -1.0,  0.0,	   0.0, 1.0,
+//
+//     -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
+//      0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   1.0, 1.0,
+//      0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   1.0, 0.0,
+//      0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   1.0, 0.0,
+//     -0.5,  0.5,  0.5,	  0.0,  1.0,  0.0,	   0.0, 0.0,
+//     -0.5,  0.5, -0.5,	  0.0,  1.0,  0.0,	   0.0, 1.0,
+// }
+//
+// cube_positions := [?]glm.vec3{
+// 	{ 0.0,  0.0,   0.0},
+//     { 2.0,  5.0, -15.0},
+//     {-1.5, -2.2,  -2.5},
+//     {-3.8, -2.0, -12.3},
+//     { 2.4, -0.4,  -3.5},
+//     {-1.7,  3.0,  -7.5},
+//     { 1.3, -2.0,  -2.5},
+//     { 1.5,  2.0,  -2.5},
+//     { 1.5,  0.2,  -1.5},
+//     {-1.3,  1.0,  -1.5},
+// }
+//
+// point_light_positions := [?]glm.vec3{
+// 	{ 0.7,  0.2,   2.0},
+// 	{ 2.3, -3.3,  -4.0},
+// 	{-4.0,  2.0, -12.0},
+// 	{ 0.0,  0.0,  -3.0},
+// }
 
 main :: proc() {
 	glfw.InitHint(glfw.PLATFORM, glfw.PLATFORM_X11)
@@ -94,9 +92,10 @@ main :: proc() {
 		panic("glfw init error")
 	}
 	defer glfw.Terminate()
-	glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, 4)
-	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 6)
+	glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, 3)
+	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 3)
 	glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+	glfw.WindowHint(glfw.OPENGL_DEBUG_CONTEXT, true)
 
 	window := glfw.CreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", nil, nil)
 	if window == nil {
@@ -116,56 +115,60 @@ main :: proc() {
 	// functions and after the window is made the current context
 	gl.load_up_to(4, 6, glfw.gl_set_proc_address)
 
+	stb.set_flip_vertically_on_load(1)
+
 	gl.Enable(gl.DEPTH_TEST)
 
-	shader_program := shader_create("shaders/container.vert.glsl", "shaders/container.frag.glsl")
+	shader_program := shader_create("shaders/model_loading.vert.glsl", "shaders/model_loading.frag.glsl")
 	defer gl.DeleteProgram(shader_program)
 
-	light_shader_program := shader_create("shaders/light.vert.glsl", "shaders/light.frag.glsl")
-	defer gl.DeleteProgram(light_shader_program)
+	our_model := model_load("resources/objects/backpack/backpack.obj")
 
-	cube_vao: u32
-	gl.GenVertexArrays(1, &cube_vao)
-	defer gl.DeleteVertexArrays(1, &cube_vao)
-
-	vbo: u32
-	gl.GenBuffers(1, &vbo)
-	defer gl.DeleteBuffers(1, &vbo)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW)
-
-	gl.BindVertexArray(cube_vao)
-	// tell OpenGL how to read the vertex data
-	// position data
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
-	gl.EnableVertexAttribArray(0)
-	// normal data
-	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
-	gl.EnableVertexAttribArray(1)
-	// texture data
-	gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 6 * size_of(f32))
-	gl.EnableVertexAttribArray(2)
-
-	light_vao: u32
-	gl.GenVertexArrays(1, &light_vao)
-	defer gl.DeleteVertexArrays(1, &light_vao)
-
-	gl.BindVertexArray(light_vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
-	gl.EnableVertexAttribArray(0)
-
-	// wireframe mode
-	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-
-	diffuse_map := load_texture("resources/textures/container2.png")
-	specular_map := load_texture("resources/textures/container2_specular.png")
-
-	gl.UseProgram(shader_program)
-	gl.Uniform1i(uniform(shader_program, "material.diffuse"), 0)
-	gl.Uniform1i(uniform(shader_program, "material.specular"), 1)
-	gl.Uniform1f(uniform(shader_program, "material.shininess"), 32)
+	// light_shader_program := shader_create("shaders/light.vert.glsl", "shaders/light.frag.glsl")
+	// defer gl.DeleteProgram(light_shader_program)
+	//
+	// cube_vao: u32
+	// gl.GenVertexArrays(1, &cube_vao)
+	// defer gl.DeleteVertexArrays(1, &cube_vao)
+	//
+	// vbo: u32
+	// gl.GenBuffers(1, &vbo)
+	// defer gl.DeleteBuffers(1, &vbo)
+	//
+	// gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	// gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW)
+	//
+	// gl.BindVertexArray(cube_vao)
+	// // tell OpenGL how to read the vertex data
+	// // position data
+	// gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
+	// gl.EnableVertexAttribArray(0)
+	// // normal data
+	// gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 3 * size_of(f32))
+	// gl.EnableVertexAttribArray(1)
+	// // texture data
+	// gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 6 * size_of(f32))
+	// gl.EnableVertexAttribArray(2)
+	//
+	// light_vao: u32
+	// gl.GenVertexArrays(1, &light_vao)
+	// defer gl.DeleteVertexArrays(1, &light_vao)
+	//
+	// gl.BindVertexArray(light_vao)
+	// gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	// gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 8 * size_of(f32), 0)
+	// gl.EnableVertexAttribArray(0)
+	//
+	// // wireframe mode
+	// // gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	//
+	// diffuse_map := load_texture("resources/textures/container2.png")
+	// specular_map := load_texture("resources/textures/container2_specular.png")
+	//
+	// gl.UseProgram(shader_program)
+	// gl.Uniform1i(uniform(shader_program, "material.diffuse"), 0)
+	// gl.Uniform1i(uniform(shader_program, "material.specular"), 1)
+	// gl.Uniform1f(uniform(shader_program, "material.shininess"), 32)
 
 	// render loop
 	for !glfw.WindowShouldClose(window) {
@@ -194,87 +197,95 @@ main :: proc() {
 		// ambient_color := diffuse_color * 0.2
 
 		gl.UseProgram(shader_program)
-		gl.Uniform3fv(uniform(shader_program, "viewPos"), 1, raw_data(&camera.pos))
-
-		// directional light
-		gl.Uniform3f(uniform(shader_program, "dirLight.direction"), -0.2, -1.0, -0.3)
-		gl.Uniform3f(uniform(shader_program, "dirLight.ambient"), 0.05, 0.05, 0.05)
-		gl.Uniform3f(uniform(shader_program, "dirLight.diffuse"), 0.4, 0.4, 0.4)
-		gl.Uniform3f(uniform(shader_program, "dirLight.specular"), 0.5, 0.5, 0.5)
-		// point light 1
-		gl.Uniform3fv(uniform(shader_program, "pointLights[0].position"), 1, raw_data(&point_light_positions[0]))
-		gl.Uniform3f(uniform(shader_program, "pointLights[0].ambient"), 0.05, 0.05, 0.05)
-		gl.Uniform3f(uniform(shader_program, "pointLights[0].diffuse"), 0.8, 0.8, 0.8)
-		gl.Uniform3f(uniform(shader_program, "pointLights[0].specular"), 1, 1, 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[0].constant"), 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[0].linear"), 0.09)
-		gl.Uniform1f(uniform(shader_program, "pointLights[0].quadratic"), 0.032)
-		// point light 2
-		gl.Uniform3fv(uniform(shader_program, "pointLights[1].position"), 1, raw_data(&point_light_positions[1]))
-		gl.Uniform3f(uniform(shader_program, "pointLights[1].ambient"), 0.05, 0.05, 0.05)
-		gl.Uniform3f(uniform(shader_program, "pointLights[1].diffuse"), 0.8, 0.8, 0.8)
-		gl.Uniform3f(uniform(shader_program, "pointLights[1].specular"), 1, 1, 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[1].constant"), 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[1].linear"), 0.09)
-		gl.Uniform1f(uniform(shader_program, "pointLights[1].quadratic"), 0.032)
-		// point light 3
-		gl.Uniform3fv(uniform(shader_program, "pointLights[2].position"), 1, raw_data(&point_light_positions[2]))
-		gl.Uniform3f(uniform(shader_program, "pointLights[2].ambient"), 0.05, 0.05, 0.05)
-		gl.Uniform3f(uniform(shader_program, "pointLights[2].diffuse"), 0.8, 0.8, 0.8)
-		gl.Uniform3f(uniform(shader_program, "pointLights[2].specular"), 1, 1, 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[2].constant"), 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[2].linear"), 0.09)
-		gl.Uniform1f(uniform(shader_program, "pointLights[2].quadratic"), 0.032)
-		// point light 4
-		gl.Uniform3fv(uniform(shader_program, "pointLights[3].position"), 1, raw_data(&point_light_positions[3]))
-		gl.Uniform3f(uniform(shader_program, "pointLights[3].ambient"), 0.05, 0.05, 0.05)
-		gl.Uniform3f(uniform(shader_program, "pointLights[3].diffuse"), 0.8, 0.8, 0.8)
-		gl.Uniform3f(uniform(shader_program, "pointLights[3].specular"), 1, 1, 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[3].constant"), 1)
-		gl.Uniform1f(uniform(shader_program, "pointLights[3].linear"), 0.09)
-		gl.Uniform1f(uniform(shader_program, "pointLights[3].quadratic"), 0.032)
-		// spot light
-		gl.Uniform3fv(uniform(shader_program, "spotLight.position"), 1, raw_data(&camera.pos))
-		gl.Uniform3fv(uniform(shader_program, "spotLight.direction"), 1, raw_data(&camera.front))
-		gl.Uniform3f(uniform(shader_program, "spotLight.ambient"), 0.0, 0.0, 0.0)
-		gl.Uniform3f(uniform(shader_program, "spotLight.diffuse"), 1, 1, 1)
-		gl.Uniform3f(uniform(shader_program, "spotLight.specular"), 1, 1, 1)
-		gl.Uniform1f(uniform(shader_program, "spotLight.constant"), 1)
-		gl.Uniform1f(uniform(shader_program, "spotLight.linear"), 0.09)
-		gl.Uniform1f(uniform(shader_program, "spotLight.quadratic"), 0.032)
-		gl.Uniform1f(uniform(shader_program, "spotLight.cutOff"), glm.cos(glm.radians_f32(12.5)))
-		gl.Uniform1f(uniform(shader_program, "spotLight.outerCutOff"), glm.cos(glm.radians_f32(17.5)))
 
 		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
 		view := camera_view_matrix(&camera)
 		gl.UniformMatrix4fv(uniform(shader_program, "projection"), 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(uniform(shader_program, "view"), 1, gl.FALSE, raw_data(&view))
 
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, diffuse_map)
-		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D, specular_map)
+		model := glm.mat4Translate({0, 0, 0}) // translate down to center model
+		model *= glm.mat4Scale({1, 1, 1}) // it's too big for our scene, scale it down
 
-		gl.BindVertexArray(cube_vao)
-		for i in 0..<len(cube_positions) {
-			cube_model := glm.mat4Translate(cube_positions[i])
-			angle := 20 * i
-			cube_model *= glm.mat4Rotate({1, 0.3, 0.5}, glm.radians(f32(angle)))
-			gl.UniformMatrix4fv(uniform(shader_program, "model"), 1, gl.FALSE, raw_data(&cube_model))
-			gl.DrawArrays(gl.TRIANGLES, 0, 36)
-		}
+		gl.UniformMatrix4fv(uniform(shader_program, "model"), 1, gl.FALSE, raw_data(&model))
+		model_draw(&our_model, shader_program)
 
-		gl.UseProgram(light_shader_program)
-		gl.UniformMatrix4fv(uniform(light_shader_program, "projection"), 1, gl.FALSE, raw_data(&projection))
-		gl.UniformMatrix4fv(uniform(light_shader_program, "view"), 1, gl.FALSE, raw_data(&view))
-
-		gl.BindVertexArray(light_vao)
-		for i in 0..<len(point_light_positions) {
-			light_model := glm.mat4Translate(point_light_positions[i])
-			light_model *= glm.mat4Scale({0.2, 0.2, 0.2})
-			gl.UniformMatrix4fv(uniform(light_shader_program, "model"), 1, gl.FALSE, raw_data(&light_model))
-			gl.DrawArrays(gl.TRIANGLES, 0, 36)
-		}
+		// gl.Uniform3fv(uniform(shader_program, "viewPos"), 1, raw_data(&camera.pos))
+		//
+		// // directional light
+		// gl.Uniform3f(uniform(shader_program, "dirLight.direction"), -0.2, -1.0, -0.3)
+		// gl.Uniform3f(uniform(shader_program, "dirLight.ambient"), 0.05, 0.05, 0.05)
+		// gl.Uniform3f(uniform(shader_program, "dirLight.diffuse"), 0.4, 0.4, 0.4)
+		// gl.Uniform3f(uniform(shader_program, "dirLight.specular"), 0.5, 0.5, 0.5)
+		// // point light 1
+		// gl.Uniform3fv(uniform(shader_program, "pointLights[0].position"), 1, raw_data(&point_light_positions[0]))
+		// gl.Uniform3f(uniform(shader_program, "pointLights[0].ambient"), 0.05, 0.05, 0.05)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[0].diffuse"), 0.8, 0.8, 0.8)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[0].specular"), 1, 1, 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[0].constant"), 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[0].linear"), 0.09)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[0].quadratic"), 0.032)
+		// // point light 2
+		// gl.Uniform3fv(uniform(shader_program, "pointLights[1].position"), 1, raw_data(&point_light_positions[1]))
+		// gl.Uniform3f(uniform(shader_program, "pointLights[1].ambient"), 0.05, 0.05, 0.05)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[1].diffuse"), 0.8, 0.8, 0.8)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[1].specular"), 1, 1, 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[1].constant"), 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[1].linear"), 0.09)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[1].quadratic"), 0.032)
+		// // point light 3
+		// gl.Uniform3fv(uniform(shader_program, "pointLights[2].position"), 1, raw_data(&point_light_positions[2]))
+		// gl.Uniform3f(uniform(shader_program, "pointLights[2].ambient"), 0.05, 0.05, 0.05)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[2].diffuse"), 0.8, 0.8, 0.8)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[2].specular"), 1, 1, 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[2].constant"), 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[2].linear"), 0.09)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[2].quadratic"), 0.032)
+		// // point light 4
+		// gl.Uniform3fv(uniform(shader_program, "pointLights[3].position"), 1, raw_data(&point_light_positions[3]))
+		// gl.Uniform3f(uniform(shader_program, "pointLights[3].ambient"), 0.05, 0.05, 0.05)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[3].diffuse"), 0.8, 0.8, 0.8)
+		// gl.Uniform3f(uniform(shader_program, "pointLights[3].specular"), 1, 1, 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[3].constant"), 1)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[3].linear"), 0.09)
+		// gl.Uniform1f(uniform(shader_program, "pointLights[3].quadratic"), 0.032)
+		// // spot light
+		// gl.Uniform3fv(uniform(shader_program, "spotLight.position"), 1, raw_data(&camera.pos))
+		// gl.Uniform3fv(uniform(shader_program, "spotLight.direction"), 1, raw_data(&camera.front))
+		// gl.Uniform3f(uniform(shader_program, "spotLight.ambient"), 0.0, 0.0, 0.0)
+		// gl.Uniform3f(uniform(shader_program, "spotLight.diffuse"), 1, 1, 1)
+		// gl.Uniform3f(uniform(shader_program, "spotLight.specular"), 1, 1, 1)
+		// gl.Uniform1f(uniform(shader_program, "spotLight.constant"), 1)
+		// gl.Uniform1f(uniform(shader_program, "spotLight.linear"), 0.09)
+		// gl.Uniform1f(uniform(shader_program, "spotLight.quadratic"), 0.032)
+		// gl.Uniform1f(uniform(shader_program, "spotLight.cutOff"), glm.cos(glm.radians_f32(12.5)))
+		// gl.Uniform1f(uniform(shader_program, "spotLight.outerCutOff"), glm.cos(glm.radians_f32(17.5)))
+		//
+		//
+		// gl.ActiveTexture(gl.TEXTURE0)
+		// gl.BindTexture(gl.TEXTURE_2D, diffuse_map)
+		// gl.ActiveTexture(gl.TEXTURE1)
+		// gl.BindTexture(gl.TEXTURE_2D, specular_map)
+		//
+		// gl.BindVertexArray(cube_vao)
+		// for i in 0..<len(cube_positions) {
+		// 	cube_model := glm.mat4Translate(cube_positions[i])
+		// 	angle := 20 * i
+		// 	cube_model *= glm.mat4Rotate({1, 0.3, 0.5}, glm.radians(f32(angle)))
+		// 	gl.UniformMatrix4fv(uniform(shader_program, "model"), 1, gl.FALSE, raw_data(&cube_model))
+		// 	gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		// }
+		//
+		// gl.UseProgram(light_shader_program)
+		// gl.UniformMatrix4fv(uniform(light_shader_program, "projection"), 1, gl.FALSE, raw_data(&projection))
+		// gl.UniformMatrix4fv(uniform(light_shader_program, "view"), 1, gl.FALSE, raw_data(&view))
+		//
+		// gl.BindVertexArray(light_vao)
+		// for i in 0..<len(point_light_positions) {
+		// 	light_model := glm.mat4Translate(point_light_positions[i])
+		// 	light_model *= glm.mat4Scale({0.2, 0.2, 0.2})
+		// 	gl.UniformMatrix4fv(uniform(light_shader_program, "model"), 1, gl.FALSE, raw_data(&light_model))
+		// 	gl.DrawArrays(gl.TRIANGLES, 0, 36)
+		// }
 
 		// check and call events and swap buffers
 		glfw.SwapBuffers(window)
