@@ -1,7 +1,6 @@
 package learnopengl
 
 import "core:fmt"
-import glm "core:math/linalg/glsl"
 import fp "core:path/filepath"
 import "core:strings"
 
@@ -14,7 +13,7 @@ Model :: struct {
 	meshes:			  [dynamic]Mesh,
 	textures_loaded:  [dynamic]Texture,
 	directory:		  string,
-	gamma_correction: bool
+	gamma_correction: bool,
 }
 
 textures_skipped := 0

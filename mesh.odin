@@ -2,8 +2,6 @@ package learnopengl
 
 import "core:fmt"
 import glm "core:math/linalg/glsl"
-import "core:strconv"
-import "core:strings"
 
 import gl "vendor:OpenGL"
 

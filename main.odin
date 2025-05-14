@@ -303,7 +303,6 @@ error_callback :: proc "c" (error: i32, desc: cstring) {
 }
 
 process_input :: proc(window: glfw.WindowHandle) {
-	camera_speed: f32 = 2.5 * f32(delta_time)
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
 	}
