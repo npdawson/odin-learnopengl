@@ -12,12 +12,12 @@ import stb "vendor:stb/image"
 delta_time: f64
 last_frame: f64
 
-SCREEN_WIDTH :: 800
-SCREEN_HEIGHT :: 600
+screen_width: i32 = 800
+screen_height: i32 = 600
 
 camera := camera_create(glm.vec3{0, 0, 3})
-last_x: f32 = SCREEN_WIDTH / 2
-last_y: f32 = SCREEN_HEIGHT / 2
+last_x: f32 = f32(screen_width) / 2
+last_y: f32 = f32(screen_height) / 2
 first_mouse := true
 
 // vertices := [?]f32 {
@@ -97,7 +97,8 @@ main :: proc() {
 	glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
 	glfw.WindowHint(glfw.OPENGL_DEBUG_CONTEXT, true)
 
-	window := glfw.CreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", nil, nil)
+	window := glfw.CreateWindow(screen_width, screen_height,
+								"LearnOpenGL", nil, nil)
 	if window == nil {
 		fmt.eprintln("failed to create GLFW window")
 		glfw.Terminate()
@@ -119,12 +120,16 @@ main :: proc() {
 
 	gl.Enable(gl.DEPTH_TEST)
 
-	shader_program := shader_create("shaders/model_loading.vert.glsl", "shaders/model_loading.frag.glsl")
+	shader_program := shader_create(
+		"shaders/model_loading.vert.glsl",
+		"shaders/model_loading.frag.glsl")
 	defer gl.DeleteProgram(shader_program)
 
 	our_model := model_load("resources/objects/backpack/backpack.obj")
 
-	// light_shader_program := shader_create("shaders/light.vert.glsl", "shaders/light.frag.glsl")
+	// light_shader_program := shader_create(
+	// 	"shaders/light.vert.glsl",
+	// 	"shaders/light.frag.glsl")
 	// defer gl.DeleteProgram(light_shader_program)
 	//
 	// cube_vao: u32
@@ -198,7 +203,8 @@ main :: proc() {
 
 		gl.UseProgram(shader_program)
 
-		projection := glm.mat4Perspective(glm.radians(camera.zoom), cast(f32)SCREEN_WIDTH/cast(f32)SCREEN_HEIGHT, 0.1, 100)
+		aspect_ratio := f32(screen_width)/f32(screen_height)
+		projection := glm.mat4Perspective(glm.radians(camera.zoom), aspect_ratio, 0.1, 100)
 		view := camera_view_matrix(&camera)
 		gl.UniformMatrix4fv(uniform(shader_program, "projection"), 1, gl.FALSE, raw_data(&projection))
 		gl.UniformMatrix4fv(uniform(shader_program, "view"), 1, gl.FALSE, raw_data(&view))
@@ -295,6 +301,8 @@ main :: proc() {
 
 framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, w, h: i32) {
 	gl.Viewport(0, 0, w, h)
+	screen_width = w
+	screen_height = h
 }
 
 error_callback :: proc "c" (error: i32, desc: cstring) {
